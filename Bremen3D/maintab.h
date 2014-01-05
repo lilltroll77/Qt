@@ -17,6 +17,9 @@
 #include "UDPcommands.h"
 #include "classes/knob.h"
 
+
+
+
 class MainTab : public QWidget
 {
     Q_OBJECT
@@ -29,7 +32,7 @@ public:
     quint16 *port;
     Knob *knob_bremen3D;
 
-    //Widgets width bublic acess
+    //Widgets width public acess
     QRadioButton *radiobuttons[4];
     QSlider *slider_MasterVolume;
 signals:
@@ -38,6 +41,7 @@ private slots:
 void generateDatagram(int command);
 
 private:
+    int currentProgram;
     QStatusBar *toplevel_statusbar;
     QByteArray datagram;
     QSignalMapper *signal_mapper;
@@ -77,6 +81,8 @@ private:
     QGroupBox *box_mixer;
 
     QVBoxLayout *mixerLayout;
+
+
 
 };
 

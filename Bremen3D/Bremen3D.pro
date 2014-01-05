@@ -54,6 +54,6 @@ RESOURCES += \
     graphics.qrc
 
 FORMS += \
-    form.ui
+
 
 

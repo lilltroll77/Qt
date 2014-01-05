@@ -1,9 +1,11 @@
 #include "maintab.h"
+#include "mainwindow.h"
 #include "UDPcommands.h"
 
 MainTab::MainTab(QWidget *parent) :
-    QWidget(parent)
-{
+    QWidget(parent){
+
+
     toplevel_statusbar=statusbar;
     top_layout = new QGridLayout;
     signal_mapper = new QSignalMapper;
@@ -19,16 +21,16 @@ MainTab::MainTab(QWidget *parent) :
     slider_MasterVolume->setTickInterval(20);
     slider_MasterVolume->setTickPosition(QSlider::TicksBothSides);
 //SIGNAL
-    signal_mapper->setMapping(slider_MasterVolume , MASTERVOLUME);
-    connect(slider_MasterVolume , SIGNAL(valueChanged(int)) , signal_mapper , SLOT(map()) );
+    //signal_mapper->setMapping(slider_MasterVolume , MASTERVOLUME);
+    //connect(slider_MasterVolume , SIGNAL(valueChanged(int)) , signal_mapper , SLOT(map()) );
 
 //Mute button
     buttonMute = new QPushButton(tr("MUTE"));
     buttonMute ->setFixedWidth(60);
     buttonMute ->setCheckable(true);
 //SIGNAL
-    signal_mapper->setMapping(buttonMute ,MUTE_ALL);
-    connect(buttonMute , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
+   // signal_mapper->setMapping(buttonMute ,MUTE_ALL);
+   // connect(buttonMute , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
 
     layout_volume ->addWidget(slider_MasterVolume);
     layout_volume ->addWidget(buttonMute);
@@ -48,8 +50,8 @@ MainTab::MainTab(QWidget *parent) :
     input_selector->setContentsMargins(5,5,5,5);
     input_selector->setMaximumWidth(75);
 //SINGAL
-    signal_mapper->setMapping(input_selector , INPUT_SOURCE);
-    connect(input_selector , SIGNAL(currentIndexChanged(int)) , signal_mapper , SLOT(map()) );
+    //signal_mapper->setMapping(input_selector , INPUT_SOURCE);
+    //connect(input_selector , SIGNAL(currentIndexChanged(int)) , signal_mapper , SLOT(map()) );
 
     box_layout->addWidget(input_selector);
     box_input->setToolTip(tr("Input selector"));
@@ -72,12 +74,12 @@ MainTab::MainTab(QWidget *parent) :
     buttonSyncToXMOS->setFixedWidth(100);
     buttonPingXMOS->setFixedWidth(100);
 //SIGNAL
-    signal_mapper->setMapping(buttonPingXMOS , PING );
-    connect(buttonPingXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-    signal_mapper->setMapping(buttonSyncFromXMOS , SYNC_FROM_XMOS );
-    connect(buttonSyncFromXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-    signal_mapper->setMapping(buttonSyncToXMOS , SYNC_TO_XMOS );
-    connect(buttonSyncToXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
+  //  signal_mapper->setMapping(buttonPingXMOS , PING );
+  //  connect(buttonPingXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
+  //  signal_mapper->setMapping(buttonSyncFromXMOS , SYNC_FROM_XMOS );
+  //  connect(buttonSyncFromXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
+  //  signal_mapper->setMapping(buttonSyncToXMOS , SYNC_TO_XMOS );
+  //  connect(buttonSyncToXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
 
 
     lineEditXMOSIP->setToolTip("IP Adress of XMOS box");
@@ -114,9 +116,10 @@ MainTab::MainTab(QWidget *parent) :
         programLayout->addWidget(openbuttons[i],i,1);
         programLayout->addWidget(savebuttons[i],i,2);
 //SIGNALS
-        signal_mapper->setMapping(radiobuttons[i] , PROGRAM_CHANGED );
-        connect(radiobuttons[i] , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-    }
+        signal_mapper->setMapping(radiobuttons[i] , i);
+        connect(radiobuttons[i] , SIGNAL(clicked(bool)) , signal_mapper , SLOT(map()) );
+   }
+    connect(signal_mapper, SIGNAL(mapped(int)) ,parent , SLOT(programChanged(int)) );
     box_program->setLayout(programLayout);
 
 
@@ -137,8 +140,8 @@ MainTab::MainTab(QWidget *parent) :
     box_crossover->setMaximumHeight(200);
     box_crossover->setMaximumWidth(120);
     //SIGNALS
-    signal_mapper->setMapping(knob_crossover , CROSSOVER_FREQ);
-    connect(knob_crossover , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
+    //signal_mapper->setMapping(knob_crossover , CROSSOVER_FREQ);
+    //connect(knob_crossover , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
 
 
     //Mixer Box
@@ -158,8 +161,7 @@ MainTab::MainTab(QWidget *parent) :
     box_mixer->setMaximumHeight(200);
     box_mixer->setMaximumWidth(120);
 //SIGNAL
-    signal_mapper->setMapping(knob_bremen3D , MIXERVALUE );
-    connect(knob_bremen3D , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
+   // connect(knob_bremen3D , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
 
     // Top layout
 
@@ -174,7 +176,7 @@ MainTab::MainTab(QWidget *parent) :
 
 
 
-    connect(signal_mapper, SIGNAL(mapped(int)) , this, SLOT(generateDatagram(int)) );
+
     setLayout(top_layout);
 
 }

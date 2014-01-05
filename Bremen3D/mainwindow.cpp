@@ -1,10 +1,9 @@
 #include "mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    mainwindow = parent;
+    MAINWindowRef =  this;
 
     msgBoxAbout = new QMessageBox;
     msgBoxAbout->setText(QString("XMOS-GUI ver: %1\n\Written in C++\nBy Mikael Bohman 2013").arg(0.01));
@@ -57,12 +56,26 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolBar = addToolBar(tr("Plot"));
     plotAction=fileToolBar->addAction("Plot frequency response");
 
+    //
+    currentProgram=0;
+    central_widget->main_tab->radiobuttons[currentProgram]->setChecked(true);
 
    }
 
 void MainWindow::slot_about(){
    msgBoxAbout->exec();
 }
+
+void MainWindow::programChanged(int program){
+   central_widget->main_tab->knob_bremen3D->setValue( programSettings[program].mixer );
+   for(int ch=0 ; ch<(int) CHANNELS ; ch++){
+       central_widget->dac_tab->channel[ch]->knob->setValue( programSettings[program].channel[ch].DACgain  );
+       central_widget->dac_tab->channel[ch]->muteButton->setChecked( programSettings[program].channel[ch].mute );
+       central_widget->dac_tab->channel[ch]->invertButton->setChecked( programSettings[program].channel[ch].invert );
+       central_widget->dac_tab->channel[ch]->channelAlias->setText(  *programSettings[program].channel[ch].alias );
+    }
+}
+
 
 void MainWindow::slot_open(){
   QString fileName;
