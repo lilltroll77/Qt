@@ -2,16 +2,33 @@
 #include <math.h>
 #include <complex>
 #include <QVector>
+#include "defines.h"
 #include "calcfilt.h"
 
+std::complex<double> ejw[PLOTSIZE];
+std::complex<double> jw;
+std::complex<double> one(1,0);
+std::complex<double> c;
+QVector<double> f(PLOTSIZE);
 
-void freqz(double B[3] , double A[2] , double fs , QVector<double> *f , std::complex<double> H[], std::complex<double> ejw[]){
+QVector<double>* f_ref(){
+    return &f;
+}
 
-    std::complex<double> one(1,0);
-    std::complex<double> c;
-    //double complex z1 = 1.0 + 3.0 * I;
 
-    for(int i=0 ; i<f->length() ; i++){
+void init_freqz(double fmin , double fmax)
+{
+    double S =log10(fmax) / log10(fmin);
+    for (int i=0; i<PLOTSIZE; ++i){
+        f[i] = FMIN *pow(10 ,S*(double) i / PLOTSIZE);
+        jw.imag() = 2* M_PI * f[i] / FS;
+        ejw[i]=exp(jw); // Precalc e^jw and where w = 2*pi f/fs
+     }
+}
+
+
+void freqz(double B[3] , double A[2] , std::complex<double> H[PLOTSIZE]){
+    for(int i=0 ; i<PLOTSIZE ; i++){
         c = ejw[i];
         H[i] =( B[0] + B[1]*c + B[2]*c*c )/ (one + A[0]*c + A[1]*c*c);
     }

@@ -16,7 +16,7 @@ class Knob : public QWidget
 {
     Q_OBJECT
 public:
-  explicit Knob(const Scale scaletype = linScale,  QWidget *parent = 0 );
+  explicit Knob(QWidget *parent = 0 , const Scale scaletype = linScale);
   void setRange(double min , double max , int steps);
   double Value();
   void setValue(double value);

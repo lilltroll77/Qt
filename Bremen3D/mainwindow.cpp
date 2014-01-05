@@ -77,8 +77,9 @@ void MainWindow::slot_open(){
   QString str;
   quint16 channels;
   quint16 sections;
-  quint32 data;
-  double fc, Q ,gain;
+  int type;
+  bool link,active;
+  double fc, Q ,gain , effect;
 
   in >> magic;
   if(magic != MAGIC_FILECHECKNUMBER){
@@ -88,44 +89,47 @@ void MainWindow::slot_open(){
       return;
 }
   in >> version;
-  if(version<QDataStream::Qt_5_2){
+  if(version<FILEVERSION){
       msgBoxError.setText(tr("FILE TOO OLD"));
       msgBoxError.setWindowTitle(tr("FILE ERROR"));
       msgBoxError.exec();
       return;
   }
-  in >> str >>channels >> sections;
+  in >> channels;
+  in >> sections;
   for(int ch=0 ; ch<(int) channels ; ch++)
    for(int sec=0 ; sec<(int) sections ; sec++){
-    in >> fc;
-    eqsettings[ch][sec].fc = fc;
-    eq_tab->channel[ch]->eqSection[sec]->knob_fc->setValue(fc);
-    in >> Q;
-    eqsettings[ch][sec].Q=Q;
-    eq_tab->channel[ch]->eqSection[sec]->knob_Q->setValue(Q);
-    in >> gain;
-    eqsettings[ch][sec].gain =gain;
-    eq_tab->channel[ch]->eqSection[sec]->knob_gain->setValue(gain);
-    in >> eqsettings[ch][sec].active;
-    in >> data;
-    eqsettings[ch][sec].filtertype = (FilterType) data;
-    in >> eqsettings[ch][sec].B[0];
-    in >> eqsettings[ch][sec].B[1];
-    in >> eqsettings[ch][sec].B[2];
-    in >> eqsettings[ch][sec].A[0];
-    in >> eqsettings[ch][sec].A[1];
+        in >> active >> type >> fc >> link >> Q >> gain;
+        in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
+        in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
+        in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
+        in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
+        in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
+
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->setChecked(active);
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->setValue(fc);
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->setValue(Q);
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->setValue(gain);
+        if(type>=0 || type < ( central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->maxCount()) )
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->setCurrentIndex( type );
+        else{
+            msgBoxError.setText(tr("FILE IS CORRUPT"));
+            msgBoxError.setWindowTitle(tr("FILE ERROR"));
+            msgBoxError.exec();
+            return;
+        }
     // update freq response data in struct
     //freqz(eqsettings[ch][sec].B  ,eqsettings[ch][sec].A, 44100 ,&f , eqsettings[ch][sec].freq , ejw);
-
-   }
+    }
+    in >> effect;
+    central_widget->main_tab->knob_bremen3D->setValue(effect);
     file.close();
-    plot->update();
-
-
+    central_widget->eq_tab->plot->update();
 }
 
 
 void MainWindow::slot_saveas(){
+
   QString fileName;
   QFileDialog *filedialog=new QFileDialog;
   filedialog->setDefaultSuffix("DSPsettings");
@@ -134,24 +138,25 @@ void MainWindow::slot_saveas(){
   file.open(QIODevice::WriteOnly);
   QDataStream out(&file);
   out << (quint64) MAGIC_FILECHECKNUMBER;
-  out.setVersion(QDataStream::Qt_5_2);
-  out << QString("Cracy Horse File");
+  out << (quint32) FILEVERSION;
+  //out << QString("Cracy Horse File");
   out << (quint16) CHANNELS;
   out << (quint16) SECTIONS;
   for(int ch=0 ; ch<CHANNELS ; ch++)
    for(int sec=0 ; sec<SECTIONS ; sec++){
-    //fetch from knobs ??
-    out << eqsettings[ch][sec].fc;
-    out << eqsettings[ch][sec].Q;
-    out << eqsettings[ch][sec].gain;
-    out << eqsettings[ch][sec].active;
-    out << (quint32) eqsettings[ch][sec].filtertype;
-    out << eqsettings[ch][sec].B[0];
-    out << eqsettings[ch][sec].B[1];
-    out << eqsettings[ch][sec].B[2];
-    out << eqsettings[ch][sec].A[0];
-    out << eqsettings[ch][sec].A[1];
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->Value();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->link->isChecked();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->Value();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->Value();
+       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
+       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
+       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
+       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
+       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
   }
+   out << central_widget->main_tab->knob_bremen3D->Value();
 
   file.close();
 }

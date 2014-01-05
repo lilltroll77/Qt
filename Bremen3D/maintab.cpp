@@ -1,4 +1,5 @@
 #include "maintab.h"
+#include "UDPcommands.h"
 
 MainTab::MainTab(QWidget *parent) :
     QWidget(parent)
@@ -120,7 +121,7 @@ MainTab::MainTab(QWidget *parent) :
 
 
  //Crossover box
-    knob_crossover = new Knob(logScale);
+    knob_crossover = new Knob(this ,logScale );
     box_crossover = new QGroupBox;
     crossoverLayout = new QVBoxLayout;
     knob_crossover-> setTitle("Fc [Hz]");
@@ -141,7 +142,7 @@ MainTab::MainTab(QWidget *parent) :
 
 
     //Mixer Box
-    knob_bremen3D = new Knob(linScale);
+    knob_bremen3D = new Knob(this , linScale);
     box_mixer = new QGroupBox;
     mixerLayout = new QVBoxLayout;
     knob_bremen3D-> setTitle("Bremen 3D [%]");
@@ -215,6 +216,6 @@ void MainTab::generateDatagram(int command){
         datagram.append(QString("MIXER: %1").arg(knob_bremen3D->Value()) );
         break;
     }
-    udpSocket->writeDatagram(datagram.data() , datagram.size() , IP , *port);
+     UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
 
 }

@@ -9,11 +9,11 @@ Widget::Widget(QWidget *parent , QStatusBar *statusbar)
     connect(UDP_Socket , SIGNAL(readyRead()),this, SLOT(readDatagram()));
 
 
-    tabWidget   = new QTabWidget(parent);
-    main_tab    = new MainTab(parent);
-    eq_tab      = new EQTab(parent);
-    adc_tab     = new ADCTab(parent);
-    dac_tab     = new DACTab(parent);
+    tabWidget   = new QTabWidget(this);
+    main_tab    = new MainTab(this);
+    eq_tab      = new EQTab(this); //defined global static
+    adc_tab     = new ADCTab(this);
+    dac_tab     = new DACTab(this);
 
     tabWidget-> addTab(main_tab, tr("Main"));
     tabWidget-> addTab(eq_tab, tr("Filter && Delay"));

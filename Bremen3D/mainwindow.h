@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #define MAGIC_FILECHECKNUMBER 17335633962690440504
+#define FILEVERSION 1
 
 #include <QMainWindow>
 #include <QAction>
@@ -10,6 +11,7 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QMessageBox>
+
 
 class MainWindow : public QMainWindow
 {
@@ -31,7 +33,7 @@ QMessageBox *msgBoxAbout;
 QMessageBox msgBoxError;
 QMenuBar *menubar;
 QToolBar *fileToolBar;
-QWidget *central_widget;
+Widget *central_widget;
 QMenu *fileMenu;
 QMenu *helpMenu;
 QAction *openAction;

@@ -24,9 +24,10 @@ class MainTab : public QWidget
 public:
     explicit MainTab(QWidget *parent = 0);
     QStatusBar *statusbar;
-    QUdpSocket *udpSocket;
-    QHostAddress IP;
+    //QUdpSocket *udpSocket;
+    //QHostAddress IP;
     quint16 *port;
+    Knob *knob_bremen3D;
 
     //Widgets width bublic acess
     QRadioButton *radiobuttons[4];
@@ -74,7 +75,7 @@ private:
 
     //Mixer box
     QGroupBox *box_mixer;
-    Knob *knob_bremen3D;
+
     QVBoxLayout *mixerLayout;
 
 };

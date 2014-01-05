@@ -42,12 +42,12 @@ void updateSpinboxValue( QDial *dial , QDoubleSpinBox *spinbox , Scale scale){
 }
 
 
-Knob::Knob(const Scale scaletype ,QWidget *parent) :
+Knob::Knob(QWidget *parent ,const Scale scaletype) :
     QWidget(parent)
 {
     {
         widget = new QWidget;
-        label_title = new QLabel(tr("title"));
+        label_title = new QLabel(tr("title"),this);
         //lineEdit_min = new QLineEdit();
         //lineEdit_max = new QLineEdit();
 //        QString style =QString("background-color: rgb(220, 200, 200)");
@@ -60,14 +60,14 @@ Knob::Knob(const Scale scaletype ,QWidget *parent) :
 //        lineEdit_min->setToolTip(tr("Minimum Value"));
 //        lineEdit_max->setToolTip(tr("Maximum Value"));
 
-        dial = new QDial();
+        dial = new QDial(this);
         dial->setNotchesVisible(true);
         //dial->setTracking(false);
         dial->setMaximumWidth(300);
         dial->setMaximumHeight(300);
         //dial->setMouseTracking();
         scale=scaletype;
-        spinbox  = new QDoubleSpinBox();
+        spinbox  = new QDoubleSpinBox(this);
         spinbox->setAlignment(Qt::AlignRight);
         layout = new QVBoxLayout;
         layout->setSpacing(2);

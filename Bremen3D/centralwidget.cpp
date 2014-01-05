@@ -3,4 +3,5 @@
 CentralWidget::CentralWidget(QWidget *parent) :
     QWidget(parent)
 {
+
 }

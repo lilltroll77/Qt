@@ -25,7 +25,11 @@ HEADERS += \
     calcfilt.h \
     classes/knob.h \
     classes/qcustomplot.h \
-    classes/transform.h
+    classes/transform.h \
+    centralwidget.h \
+    eqchannel.h \
+    eqsection.h \
+    defines.h
 
 SOURCES += \
     adc.cpp \
@@ -41,9 +45,15 @@ SOURCES += \
     calcfilt.cpp \
     classes/knob.cpp \
     classes/qcustomplot.cpp \
-    classes/transform.cpp
+    classes/transform.cpp \
+    centralwidget.cpp \
+    eqchannel.cpp \
+    eqsection.cpp
 
 RESOURCES += \
     graphics.qrc
+
+FORMS += \
+    form.ui
 
 

@@ -16,8 +16,8 @@
 #include "UDPcommands.h"
 
 //Macro
+
 Q_GLOBAL_STATIC(QStatusBar , statusbar)
-static EQTab *eq_tab;
 
 class Widget : public QWidget
 {
@@ -26,19 +26,16 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = 0, QStatusBar *statusbar =0);
     int getCurrentTabIndex();
-
-
-
+    MainTab *main_tab;
+    EQTab *eq_tab;
+    DACTab *dac_tab;
+    ADCTab *adc_tab;
     ~Widget();
 
 private slots:
 void readDatagram();
 
 private:
-MainTab *main_tab;
-
-DACTab *dac_tab;
-ADCTab *adc_tab;
 char datagram_RX[DATAGRAM_RX_MAXLEN];
     QTabWidget *tabWidget;
     QMenuBar *menuBar;
