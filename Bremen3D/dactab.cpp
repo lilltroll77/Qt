@@ -29,8 +29,8 @@ DACGain::DACGain(QWidget *parent) :
     invertButton->setText(tr("Invert"));
     invertButton->setToolTip(tr("DAC Output Polarity"));
 
-    connect(muteButton , SIGNAL(clicked(bool)) , this , SLOT(slot_muteButton_Clicked(bool)));
-    connect(invertButton , SIGNAL(clicked(bool)) , this , SLOT(slot_invertButton_Clicked(bool)));
+    connect(muteButton , SIGNAL(toggled(bool)) , this , SLOT(slot_muteButton_Clicked(bool)));
+    connect(invertButton , SIGNAL( toggled(bool)) , this , SLOT(slot_invertButton_Clicked(bool)));
     connect(knob, SIGNAL(valueChanged(double)) , this , SLOT(slot_gainChanged(double)));
 
     layout->addWidget(channelAlias);
@@ -97,8 +97,6 @@ DACTab::DACTab(QWidget *parent) :
     topLayout = new QGridLayout;
     layout = new QGridLayout;
     groupBox = new QGroupBox;
-
-    DACGain *channel[8];
 
     for(int i=0 ; i<8 ; i++){
         channel[i] = new DACGain;

@@ -22,6 +22,11 @@ public:
     void setBoxTitle(const QString &title);
     void setChannelAlias(const QString & text);
     void setChannelID(int ID);
+    QPushButton *muteButton;
+    QPushButton *invertButton;
+    Knob *knob;
+    QLineEdit *channelAlias;
+
 
 signals:
     void gainChanged(double);
@@ -38,11 +43,8 @@ int channelID;
 QByteArray datagram;
 QVBoxLayout *topLayout;
 QVBoxLayout *layout;
-QLineEdit *channelAlias;
-QPushButton *muteButton;
-QPushButton *invertButton;
 QGroupBox *groupBoxChannel;
-Knob *knob;
+
 };
 
 class DACTab : public QWidget
@@ -51,6 +53,7 @@ class DACTab : public QWidget
 public:
     explicit DACTab(QWidget *parent = 0);
     QStatusBar *statusbar;
+    DACGain *channel[8];
 
 signals:
 

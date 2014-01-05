@@ -80,6 +80,7 @@ void MainWindow::slot_open(){
   int type;
   bool link,active;
   double fc, Q ,gain , effect;
+  QString displayText;
 
   in >> magic;
   if(magic != MAGIC_FILECHECKNUMBER){
@@ -97,7 +98,15 @@ void MainWindow::slot_open(){
   }
   in >> channels;
   in >> sections;
-  for(int ch=0 ; ch<(int) channels ; ch++)
+  in >> effect;
+  central_widget->main_tab->knob_bremen3D->setValue(effect);
+
+
+  for(int ch=0 ; ch<(int) channels ; ch++){
+      in >> gain; central_widget->dac_tab->channel[ch]->knob->setValue(gain);
+      in >> active; central_widget->dac_tab->channel[ch]->muteButton->setChecked(active);
+      in >> active; central_widget->dac_tab->channel[ch]->invertButton->setChecked(active);
+      in >> displayText ; central_widget->dac_tab->channel[ch]->channelAlias->setText(displayText);
    for(int sec=0 ; sec<(int) sections ; sec++){
         in >> active >> type >> fc >> link >> Q >> gain;
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
@@ -121,8 +130,7 @@ void MainWindow::slot_open(){
     // update freq response data in struct
     //freqz(eqsettings[ch][sec].B  ,eqsettings[ch][sec].A, 44100 ,&f , eqsettings[ch][sec].freq , ejw);
     }
-    in >> effect;
-    central_widget->main_tab->knob_bremen3D->setValue(effect);
+  }
     file.close();
     central_widget->eq_tab->plot->update();
 }
@@ -142,7 +150,13 @@ void MainWindow::slot_saveas(){
   //out << QString("Cracy Horse File");
   out << (quint16) CHANNELS;
   out << (quint16) SECTIONS;
-  for(int ch=0 ; ch<CHANNELS ; ch++)
+  out << central_widget->main_tab->knob_bremen3D->Value();
+
+  for(int ch=0 ; ch<CHANNELS ; ch++){
+      out << central_widget->dac_tab->channel[ch]->knob->Value();
+      out << central_widget->dac_tab->channel[ch]->muteButton->isChecked();
+      out << central_widget->dac_tab->channel[ch]->invertButton->isChecked();
+      out << central_widget->dac_tab->channel[ch]->channelAlias->displayText();
    for(int sec=0 ; sec<SECTIONS ; sec++){
         out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
         out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();
@@ -156,7 +170,7 @@ void MainWindow::slot_saveas(){
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
   }
-   out << central_widget->main_tab->knob_bremen3D->Value();
+}
 
   file.close();
 }
