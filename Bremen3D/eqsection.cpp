@@ -98,27 +98,28 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
   }
 
 
-  void::EQSection::updateSettingsAndPlot(){
+  void::EQSection::updateSettingsAndPlot(bool updatePlot){
       double fc = knob_fc->Value();
       double Q =  knob_Q->Value();
       double gain = knob_gain->Value();
       FilterType type = (FilterType)  filterType->currentIndex();
       calcFilt( fc  , Q , gain , 44100 ,type , B  ,A );
       freqz(B ,A , freq);
-      emit eqchanged(); //Signal to parent its time to update plot
+      if(updatePlot)
+        emit eqchanged(); //Signal to parent its time to update plot
   }
 
 
   //SLOTS
   void EQSection::slot_gainChanged(double gain){
-      updateSettingsAndPlot();
+      updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("EQ Gain changed to %1 at EQsection %2 on ch %3").arg(gain).arg(sectionID).arg(channelID));
       UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
   }
 
   void EQSection::slot_Q_Changed(double Q){
-      updateSettingsAndPlot();
+      updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("EQ Q changed to %1 at EQsection %2 on ch %3").arg(Q).arg(sectionID).arg(channelID));
       UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
@@ -127,7 +128,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
 
   void EQSection::slot_fcChanged(double fc){
       eqTracer->setGraphKey(fc);
-      updateSettingsAndPlot();
+      updateSettingsAndPlot(true);
 
       datagram.clear();
       datagram.append(QString("EQ fc changed to %1 at EQsection %2 on ch %3").arg(fc).arg(sectionID).arg(channelID));
@@ -140,7 +141,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
       else
           knob_gain->setDisabled(false);
 
-      updateSettingsAndPlot();
+      updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("Filtertype changed to %1 at EQsection %2 on ch %3").arg(type).arg(sectionID).arg(channelID));
       UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
@@ -153,7 +154,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
   void EQSection::slot_activeEQChanged(bool state){
   //
        eqTracer->setVisible(state);
-        updateSettingsAndPlot(); ///can be optimized
+        updateSettingsAndPlot(true); ///can be optimized
 
        datagram.clear();
        datagram.append(QString("EQsection %2 on ch %3 changed state to %1").arg(state).arg(sectionID).arg(channelID));

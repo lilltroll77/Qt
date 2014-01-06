@@ -56,6 +56,40 @@ void EQTab::slot_updatePlot(int newChannel){
     activeChannel=newChannel;
 
 }
+void EQTab::slot_linkchannel(int val){
+    //channel*CHANNELS + ch
+    int masterCh = val/CHANNELS;
+    int slaveCh = val % CHANNELS;
+    bool state;
+    QFont font;
+    state = channel[masterCh]->linkChannel[slaveCh]->isChecked();
+     plot->graph(slaveCh)->setVisible(!state);
+     plot->replot();
+
+    for(int ch=0 ; ch< CHANNELS ; ch++){
+        channel[slaveCh]->linkChannel[ch]->setVisible(!state);
+
+        if(ch !=masterCh & ch!= slaveCh)
+            channel[ch]->linkChannel[slaveCh]->setDisabled(state);
+    }
+
+    channel[slaveCh]->scrollArea->setVisible(!state);
+    if(state){
+        channel[slaveCh]->label_link->setText(QString("This channel is linked from channel %1").arg(masterCh));
+        channel[slaveCh]->label_link->setAlignment(Qt::AlignTop | Qt::AlignVCenter );
+        font.setPointSize(12);
+        channel[slaveCh]->label_link->setFont(font);
+        /// Fix the graph
+    }else{
+        channel[slaveCh]->label_link->setText(tr("Link to Ch: "));
+        channel[slaveCh]->label_link->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
+        font.setPointSize(8);
+        channel[slaveCh]->label_link->setFont(font);
+    }
+
+   //channel[slaveCh]->linkChannel[masterCh]->setChecked(true);
+
+}
 
 // **************************************************************
 

@@ -17,11 +17,15 @@ public:
     void disableGraph();
     EQSection *eqSection[8];
     QPen *pen;
+    QCheckBox *linkChannel[8];
+    QLabel *label_link;
+    QScrollArea *scrollArea;
 
 signals:
 
 public slots:
 void recalc_graph();
+
 
 private:
 QHBoxLayout * layout_eqsections;
@@ -30,7 +34,6 @@ QVector<double> Hmag;
 QCustomPlot *plot;
 int channel;
 QColor color;
-QScrollArea *scrollArea;
 QWidget *widget;
 //QVector<double> *f;
 };

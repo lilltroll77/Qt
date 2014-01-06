@@ -21,7 +21,7 @@ public:
     void setSectionID(int newID);
     void setChannelID(int newID);
     void setBoxTitle(const QString &title);
-    void updateSettingsAndPlot();
+    void updateSettingsAndPlot(bool updatePlot);
     QGroupBox *groupBox;
     QComboBox *filterType;
     QCheckBox *link;

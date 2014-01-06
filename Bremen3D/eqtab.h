@@ -15,10 +15,11 @@ class EQTab : public QWidget
 public:
     explicit EQTab(QWidget *parent = 0);
     EQChannel *channel[8];
+
     QCustomPlot *plot;
 
-
-private slots:
+public slots:
+void slot_linkchannel(int channel);
 void slot_updatePlot(int newChannel);
 
 private:

@@ -28,7 +28,7 @@ struct Channel_t{
     double DACgain=0;
     bool invert=false;
     bool mute=false;
-    QString *alias;
+    QString alias;
     EQSection_t eqsection[SECTIONS];
 };
 
@@ -47,7 +47,7 @@ public:
 signals:
 
 public slots:
-void programChanged(int program);
+void programChanged(int new_program);
 
 private slots:
 void slot_about();
@@ -73,6 +73,5 @@ Settings_t programSettings[4];
 
 };
 
-static MainWindow *MAINWindowRef;
 
 #endif // MAINWINDOW_H

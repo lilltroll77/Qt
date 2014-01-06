@@ -3,10 +3,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    MAINWindowRef =  this;
-
     msgBoxAbout = new QMessageBox;
-    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\n\Written in C++\nBy Mikael Bohman 2013").arg(0.01));
+    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION));
     msgBoxAbout->setFixedWidth(640);
     msgBoxAbout->setFixedHeight(480);
     msgBoxAbout->setWindowTitle(tr("About"));
@@ -20,13 +18,14 @@ MainWindow::MainWindow(QWidget *parent) :
     helpMenu = new QMenu(tr("&Help"), this);
     //QIcon(":/images/new.png")
 
-    openAction = fileMenu->addAction(tr("&Open File..."));
+    openAction = fileMenu->addAction(tr("&Open ..."));
     connect(openAction,SIGNAL(triggered()),this,SLOT(slot_open()) );
 
     saveAsAction = fileMenu->addAction(tr("&Save as..."));
     connect(saveAsAction , SIGNAL(triggered()),this,SLOT(slot_saveas()) );
 
     exitAction = fileMenu->addAction(tr("E&xit"));
+    connect(exitAction , SIGNAL(triggered()),this,SLOT(close()) ) ;
 
 
     aboutAction= helpMenu->addAction(tr("&About"));
@@ -53,9 +52,17 @@ MainWindow::MainWindow(QWidget *parent) :
    // connect(central_widget-> , SIGNAL() , this ,SLOT() );
 
 /*** TOOLBARS ***/
-    fileToolBar = addToolBar(tr("Plot"));
-    plotAction=fileToolBar->addAction("Plot frequency response");
+    QIcon *openIcon = new QIcon(":/icons/images/open.png");
+    QIcon *saveIcon = new QIcon(":/icons/images/save.png");
+    QIcon *syncIcon = new QIcon(":/icons/images/Sync.png");
+    QIcon *mainIcon = new QIcon(":/icons/images/artsfftscope.png");
 
+    setWindowIcon(*mainIcon);
+
+    fileToolBar = addToolBar(tr("File"));
+    openAction=fileToolBar->addAction(*openIcon,tr("Open File"));
+    saveAction=fileToolBar->addAction(*saveIcon,tr("Save File"));
+    /*syncAction=*/fileToolBar->addAction(*syncIcon,tr("Sync with XMOS"));
     //
     currentProgram=0;
     central_widget->main_tab->radiobuttons[currentProgram]->setChecked(true);
@@ -66,14 +73,71 @@ void MainWindow::slot_about(){
    msgBoxAbout->exec();
 }
 
-void MainWindow::programChanged(int program){
-   central_widget->main_tab->knob_bremen3D->setValue( programSettings[program].mixer );
-   for(int ch=0 ; ch<(int) CHANNELS ; ch++){
-       central_widget->dac_tab->channel[ch]->knob->setValue( programSettings[program].channel[ch].DACgain  );
-       central_widget->dac_tab->channel[ch]->muteButton->setChecked( programSettings[program].channel[ch].mute );
-       central_widget->dac_tab->channel[ch]->invertButton->setChecked( programSettings[program].channel[ch].invert );
-       central_widget->dac_tab->channel[ch]->channelAlias->setText(  *programSettings[program].channel[ch].alias );
+void MainWindow::programChanged(int new_program){
+    ///Tell XMOS to MUTE and then change program and thereafter save new settings, finally unmute
+    programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
+    central_widget->main_tab->knob_bremen3D->setValue( programSettings[new_program].mixer );  //Fetch new
+    for(int ch=0 ; ch< CHANNELS ; ch++){
+    //DAC Gain
+       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].DACgain = central_widget->dac_tab->channel[ch]->knob->Value(); //Store
+       central_widget->dac_tab->channel[ch]->knob->setValue( programSettings[new_program].channel[ch].DACgain  ); // Fetch
+    //DAC mute
+       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].mute = central_widget->dac_tab->channel[ch]->muteButton->isChecked();
+       central_widget->dac_tab->channel[ch]->muteButton->setChecked( programSettings[new_program].channel[ch].mute );
+    //DAC invert
+       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].invert = central_widget->dac_tab->channel[ch]->invertButton->isChecked();
+       central_widget->dac_tab->channel[ch]->invertButton->setChecked( programSettings[new_program].channel[ch].invert );
+    //DAC Alias
+       /// USE pointer instead ???
+       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].alias = central_widget->dac_tab->channel[ch]->channelAlias->displayText();
+       central_widget->dac_tab->channel[ch]->channelAlias->setText(  programSettings[new_program].channel[ch].alias );
+
+    for(int sec=0 ; sec < SECTIONS ; sec++){
+        ///TELL XMOS ???, but DO NOT REDRAW
+        // EQsection active
+            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].active = central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->blockSignals(true);
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->setChecked( programSettings[new_program].channel[ch].eqsection[sec].active );
+            //update tracer
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->eqTracer->setVisible( programSettings[new_program].channel[ch].eqsection[sec].active );
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->blockSignals(false);
+
+        // EQsection link
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->blockSignals(true);
+            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].link = central_widget->eq_tab->channel[ch]->eqSection[sec]->link->isChecked();
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->setChecked( programSettings[new_program].channel[ch].eqsection[sec].link );
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->blockSignals(false);
+        // EQsection Q
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->blockSignals(true);
+            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].Q = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->Value();
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].Q   );
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->blockSignals(false);
+        // EQsection gain
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->blockSignals(true);
+            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].gain = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->Value();
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].gain   );
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->blockSignals(false);
+
+         // EQsection filtertype
+            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].type = (FilterType) central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->blockSignals(true);
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->setCurrentIndex( (int) programSettings[ new_program ].channel[ch].eqsection[sec].type );
+            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->blockSignals(false);
+
+         // EQsection fc will also update eqtracer
+             programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].fc = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->Value();
+             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->blockSignals(true);
+             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].fc   );
+             //update eqtracer
+             central_widget->eq_tab->channel[ch]->eqSection[sec]->eqTracer->setGraphKey(  programSettings[ new_program ].channel[ch].eqsection[sec].fc );
+             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->blockSignals(false);
+
+             central_widget->eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false); //recalc B,A,freq
+
+          }
+        central_widget->eq_tab->channel[ch]->recalc_graph(); // All sections updated including individual freq resp ->recalc graph
     }
+    currentProgram=new_program;
 }
 
 
@@ -154,7 +218,7 @@ void MainWindow::slot_saveas(){
   QString fileName;
   QFileDialog *filedialog=new QFileDialog;
   filedialog->setDefaultSuffix("DSPsettings");
-  fileName=filedialog->getSaveFileName(this , tr("Save File"),"","DSPsettings");
+  fileName=filedialog->getSaveFileName(this , tr("Save current program to file"),"","DSPsettings");
   QFile file(fileName);
   file.open(QIODevice::WriteOnly);
   QDataStream out(&file);

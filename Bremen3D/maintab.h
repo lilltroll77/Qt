@@ -18,8 +18,6 @@
 #include "classes/knob.h"
 
 
-
-
 class MainTab : public QWidget
 {
     Q_OBJECT
@@ -66,8 +64,7 @@ private:
     QGroupBox *box_program;
     QVBoxLayout *box_layout;
 
-    QPushButton *openbuttons[4];
-    QPushButton *savebuttons[4];
+   // QPushButton *openbuttons[4];
     //Input selector box
     QGroupBox *box_input;
     QComboBox *input_selector;

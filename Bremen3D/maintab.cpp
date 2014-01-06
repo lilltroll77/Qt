@@ -107,20 +107,21 @@ MainTab::MainTab(QWidget *parent) :
         radiobuttons[i] = new QRadioButton(QString("Program %1").arg(i));
         radiobuttons[i]->setFixedWidth(100);
 
-        openbuttons[i] = new QPushButton(tr("Open"));
-        openbuttons[i]->setFixedWidth(40);
+        //openbuttons[i] = new QPushButton(tr("Open"));
+        //openbuttons[i]->setFixedWidth(40);
 
-        savebuttons[i] = new QPushButton(tr("Save"));
-        savebuttons[i]->setFixedWidth(40);
-        programLayout->addWidget(radiobuttons[i],i,0);
-        programLayout->addWidget(openbuttons[i],i,1);
-        programLayout->addWidget(savebuttons[i],i,2);
+        programLayout->addWidget(radiobuttons[i],i,1);
+        //programLayout->addWidget(openbuttons[i],i,0);
+
 //SIGNALS
         signal_mapper->setMapping(radiobuttons[i] , i);
         connect(radiobuttons[i] , SIGNAL(clicked(bool)) , signal_mapper , SLOT(map()) );
    }
-    connect(signal_mapper, SIGNAL(mapped(int)) ,parent , SLOT(programChanged(int)) );
+    //QObject *test = this->parent()->parent();
+
+    connect(signal_mapper, SIGNAL(mapped(int)) ,  this->parent()->parent() , SLOT(programChanged(int)) );
     box_program->setLayout(programLayout);
+
 
 
  //Crossover box
@@ -146,6 +147,8 @@ MainTab::MainTab(QWidget *parent) :
 
     //Mixer Box
     knob_bremen3D = new Knob(this , linScale);
+    //knob_bremen3D ->setProperty("program" , QVariant());
+    //knob_bremen3D ->setUserData(0,QObjectUserData());
     box_mixer = new QGroupBox;
     mixerLayout = new QVBoxLayout;
     knob_bremen3D-> setTitle("Bremen 3D [%]");

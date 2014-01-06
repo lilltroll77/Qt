@@ -36,6 +36,24 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref ) 
      //Sets the scroll area's widget.
      //Note that You must add the layout of widget before you call this function
      scrollArea->setWidget(widget);
+
+     QGridLayout *layout = new QGridLayout(this);
+     label_link = new QLabel(tr("Link to Ch: "));
+     QSignalMapper *mapper = new QSignalMapper;
+     label_link->setToolTip(tr("Link the EQ settings of this channel to other channels"));
+     layout->addWidget(scrollArea,0,0,1,10);
+     layout->addWidget(label_link,1,0);
+     for(int ch=0 ; ch<CHANNELS ; ch++){
+        linkChannel[ch] =new QCheckBox(QString("%1").arg(ch) , this);
+        layout->addWidget(linkChannel[ch],1,1+ch);
+        mapper->setMapping(linkChannel[ch] , channel*CHANNELS + ch  );
+        connect(linkChannel[ch] , SIGNAL(toggled(bool)) , mapper ,SLOT( map() ));
+         }
+     connect(mapper , SIGNAL(mapped(int)) , parent , SLOT(slot_linkchannel(int)) );
+     linkChannel[channel]->setDisabled(true);
+     setLayout(layout);
+
+
  }
 
 void EQChannel::enableGraph(){
@@ -55,6 +73,7 @@ void EQChannel::disableGraph(){
         eqSection[sec]->eqTracer->setPen(*pen);
     plot->replot();
 }
+
 
 
 void EQChannel::recalc_graph(){

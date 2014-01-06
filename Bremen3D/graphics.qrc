@@ -4,5 +4,7 @@
         <file>images/new.png</file>
         <file>images/open.png</file>
         <file>images/save.png</file>
+        <file>images/Sync.png</file>
+        <file>images/artsfftscope.png</file>
     </qresource>
 </RCC>

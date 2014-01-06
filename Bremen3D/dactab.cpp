@@ -13,7 +13,7 @@ DACGain::DACGain(QWidget *parent) :
     channelAlias->setToolTip(tr("Channel Alias name"));
 
     knob = new Knob;
-    knob->setRange(-10,10,40);
+    knob->setRange(-40,0,80);
     knob->setTitle("Gain [dB]");
     knob->setKnobColor("rgb(255, 255, 70)");
     knob->setDecimals(1);
