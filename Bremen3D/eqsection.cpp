@@ -2,14 +2,15 @@
 #include "eqtab.h" // to acess static f and ejw
 #include "widget.h"
 
-EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp ):
+EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Knob *knob_linkedFc_ref):
       QWidget(parent)
   {
       plot = new_plot;
+      knob_linkedFc = knob_linkedFc_ref;
 
-      UDP_Socket = udp->UDP_Socket;
-      IP_XMOS = udp->IP_XMOS;
-      port_XMOS = udp->port_XMOS;
+      UDP_Socket    = udp->UDP_Socket;
+      IP_XMOS       = udp->IP_XMOS;
+      port_XMOS     = udp->port_XMOS;
 
       //Defaults for tracer
       eqTracer = new QCPItemTracer(plot);
@@ -154,8 +155,9 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp ):
   }
 
   void EQSection::slot_linkStatusChanged(bool state){
-
-  }
+    if(state)
+      knob_fc->setValue(knob_linkedFc->Value()  );
+    }
 
   void EQSection::slot_activeEQChanged(bool state){
   //

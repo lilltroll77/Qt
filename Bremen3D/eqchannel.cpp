@@ -1,5 +1,5 @@
 #include "eqchannel.h"
-EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, Network *udp ) :
+EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, Network *udp , Knob *knob_linkedFc) :
     QWidget(parent){
 
     plot=plot_ref;
@@ -44,7 +44,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     layout_eqsections->addWidget(box_delay);
 
     for(int section=0 ; section<8 ;section++){
-         eqSection[section]=new EQSection(this , plot , udp);
+         eqSection[section]=new EQSection(this , plot , udp , knob_linkedFc);
          eqSection[section]->setBoxTitle(QString("Filter %1").arg(section));
          eqSection[section]->setSectionID(section);
          eqSection[section]->setChannelID(new_channel);

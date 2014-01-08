@@ -161,7 +161,7 @@ void MainWindow::slot_open(){
   quint16 sections;
   int type;
   bool link,active;
-  double fc, Q ,gain , effect;
+  double fc, Q ,gain , effect, delay;
   QString displayText;
 
   in >> magic;
@@ -182,13 +182,15 @@ void MainWindow::slot_open(){
   in >> sections;
   in >> effect;
   central_widget->main_tab->knob_bremen3D->setValue(effect);
-
+  in >> fc;
+  central_widget->eq_tab->knob_linkedFc->setValue(fc);
 
   for(int ch=0 ; ch<(int) channels ; ch++){
       in >> gain; central_widget->dac_tab->channel[ch]->knob->setValue(gain);
       in >> active; central_widget->dac_tab->channel[ch]->muteButton->setChecked(active);
       in >> active; central_widget->dac_tab->channel[ch]->invertButton->setChecked(active);
       in >> displayText ; central_widget->dac_tab->channel[ch]->channelAlias->setText(displayText);
+      in >> delay; central_widget->eq_tab->channel[ch]->knob_delay->setValue(delay);
    for(int sec=0 ; sec<(int) sections ; sec++){
         in >> active >> type >> fc >> link >> Q >> gain;
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
@@ -233,12 +235,14 @@ void MainWindow::slot_saveas(){
   out << (quint16) CHANNELS;
   out << (quint16) SECTIONS;
   out << central_widget->main_tab->knob_bremen3D->Value();
+  out << central_widget->eq_tab->knob_linkedFc->Value();
 
   for(int ch=0 ; ch<CHANNELS ; ch++){
       out << central_widget->dac_tab->channel[ch]->knob->Value();
       out << central_widget->dac_tab->channel[ch]->muteButton->isChecked();
       out << central_widget->dac_tab->channel[ch]->invertButton->isChecked();
       out << central_widget->dac_tab->channel[ch]->channelAlias->displayText();
+      out << central_widget->eq_tab->channel[ch]->knob_delay->Value();
    for(int sec=0 ; sec<SECTIONS ; sec++){
         out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
         out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();

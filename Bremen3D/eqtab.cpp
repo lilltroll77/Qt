@@ -17,9 +17,19 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     init_freqz(FMIN , FS/2);
 
+    //   linked fc
+    knob_linkedFc = new Knob(this,logScale);
+    knob_linkedFc-> setTitle("Fc [Hz]");
+    knob_linkedFc-> setKnobColor("rgb(255, 127, 127)");
+    knob_linkedFc->setRange(10,20000,100);
+    knob_linkedFc->setDecimals(0);
+    knob_linkedFc->setSingleStep(1);
+    knob_linkedFc->setValue(DEFAULT_FC);
+    connect(knob_linkedFc , SIGNAL(valueChanged(double)) , this , SLOT(slot_linkedFcChanged(double)) );
+
     //Create channel tabs
     for(int i=0 ; i<CHANNELS ;i++){
-        channel[i] = new EQChannel(this , i , plot ,udp );
+        channel[i] = new EQChannel(this , i , plot ,udp ,knob_linkedFc);
         channelTabs->addTab(channel[i] , (QString("%1").arg(i)) );
         connect(channelTabs , SIGNAL(currentChanged(int)) , this , SLOT(slot_updatePlot(int)));
     }
@@ -31,15 +41,9 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     layout->addWidget(channelTabs,0,0);
     layout->setContentsMargins(3,3,3,3);
 
-    //   linked fc
-    knob_linkedFc = new Knob(this,logScale);
-    knob_linkedFc-> setTitle("Fc [Hz]");
-    knob_linkedFc-> setKnobColor("rgb(255, 127, 127)");
-    knob_linkedFc->setRange(10,20000,100);
-    knob_linkedFc->setDecimals(0);
-    knob_linkedFc->setSingleStep(1);
-    knob_linkedFc->setValue(DEFAULT_FC);
-    connect(knob_linkedFc , SIGNAL(valueChanged(double)) , this , SLOT(slot_linkedFcChanged(double)) );
+
+
+
 
     layout_linkedFc = new QVBoxLayout;
     layout_linkedFc->addWidget(knob_linkedFc);

@@ -2,7 +2,7 @@
 #define DEFINES_H
 
 
-#define VERSION "0.01"
+#define VERSION "0.02"
 #define FS 44100
 #define FMIN 10
 #define SETMAXIMUMWIDTH 80

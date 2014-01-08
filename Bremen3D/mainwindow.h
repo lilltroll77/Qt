@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #define MAGIC_FILECHECKNUMBER 17335633962690440504
-#define FILEVERSION 1
+#define FILEVERSION 2
 
 #include <QMainWindow>
 #include <QAction>
@@ -25,6 +25,7 @@ struct EQSection_t{
 
 struct Channel_t{
     double DACgain=0;
+    double delay=0;
     bool invert=false;
     bool mute=false;
     QString alias;
@@ -33,6 +34,7 @@ struct Channel_t{
 
 struct Settings_t{
     double mixer=0;
+    double linkedFc;
     Channel_t channel[CHANNELS];
 };
 

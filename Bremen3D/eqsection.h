@@ -19,7 +19,7 @@ class EQSection : public QWidget
 {
     Q_OBJECT
 public:
-    explicit EQSection(QWidget *parent = 0 , QCustomPlot *new_plot = 0 , Network *udp=0 );
+    explicit EQSection(QWidget *parent = 0 , QCustomPlot *new_plot = 0 , Network *udp=0 , Knob *knob_linkedFc_ref=0 );
     void setSectionID(int newID);
     void setChannelID(int newID);
     void setBoxTitle(const QString &title);
@@ -57,6 +57,7 @@ private:
  QHostAddress *IP_XMOS;
  quint16 *port_XMOS;
  QByteArray datagram;
+ Knob *knob_linkedFc;
 };
 
 
