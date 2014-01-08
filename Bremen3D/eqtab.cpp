@@ -5,9 +5,11 @@
 
 
 
-EQTab::EQTab(QWidget *parent ) :
+EQTab::EQTab(QWidget *parent , Network *udp) :
     QWidget(parent)
 {
+
+
     channelTabs = new QTabWidget(this);
     layout = new QGridLayout(this);
     plot = new QCustomPlot(this);
@@ -17,7 +19,7 @@ EQTab::EQTab(QWidget *parent ) :
 
     //Create channel tabs
     for(int i=0 ; i<CHANNELS ;i++){
-        channel[i] = new EQChannel(this , i , plot );
+        channel[i] = new EQChannel(this , i , plot ,udp );
         channelTabs->addTab(channel[i] , (QString("%1").arg(i)) );
         connect(channelTabs , SIGNAL(currentChanged(int)) , this , SLOT(slot_updatePlot(int)));
     }
@@ -28,6 +30,27 @@ EQTab::EQTab(QWidget *parent ) :
     channelTabs->setTabPosition(QTabWidget::West);
     layout->addWidget(channelTabs,0,0);
     layout->setContentsMargins(3,3,3,3);
+
+    //   linked fc
+    knob_linkedFc = new Knob(this,logScale);
+    knob_linkedFc-> setTitle("Fc [Hz]");
+    knob_linkedFc-> setKnobColor("rgb(255, 127, 127)");
+    knob_linkedFc->setRange(10,20000,100);
+    knob_linkedFc->setDecimals(0);
+    knob_linkedFc->setSingleStep(1);
+    knob_linkedFc->setValue(DEFAULT_FC);
+    connect(knob_linkedFc , SIGNAL(valueChanged(double)) , this , SLOT(slot_linkedFcChanged(double)) );
+
+    layout_linkedFc = new QVBoxLayout;
+    layout_linkedFc->addWidget(knob_linkedFc);
+
+    box_linkedFc = new QGroupBox;
+    box_linkedFc->setLayout(layout_linkedFc);
+    box_linkedFc->setTitle(tr("Linked fc"));
+    box_linkedFc->setMaximumHeight(130);
+     box_linkedFc->setMaximumWidth(80);
+    layout->addWidget(box_linkedFc,1,0);
+
     plot->xAxis->setScaleType(QCPAxis::stLogarithmic);
     plot->xAxis->setAutoSubTicks(false);
     plot->xAxis->setSubTickCount(9);
@@ -44,10 +67,17 @@ EQTab::EQTab(QWidget *parent ) :
     //plot->legend->setUserData();
 
     plot->replot();
-    layout->addWidget(plot,0,1);
+    layout->addWidget(plot,0,1,2,1);
     layout->setColumnStretch(0,1);
     layout->setColumnStretch(1,1);
     setLayout(layout);
+}
+
+void EQTab::slot_linkedFcChanged(double value){
+    for(int ch=0 ; ch<CHANNELS ;ch++)
+        for(int sec=0 ; sec<SECTIONS ; sec++)
+            if(channel[ch]->eqSection[sec]->link->isChecked())
+                channel[ch]->eqSection[sec]->knob_fc->setValue(value);
 }
 
 void EQTab::slot_updatePlot(int newChannel){
@@ -96,21 +126,7 @@ void EQTab::slot_linkchannel(int val){
 /*
 
 
-     //   DELAY
-     knob_delay  = new Knob(linScale);
-     knob_delay -> setTitle("t [ms]");
-     knob_delay -> setKnobColor("rgb(255, 200, 127)");
-     knob_delay -> setRange(0,20,100);
-     knob_delay -> setDecimals(3);
-     knob_delay -> setSingleStep(0.001);
-    groupBoxDelay  = new QGroupBox;
-     layout_delay   = new QVBoxLayout;
-     layout_delay->addWidget(knob_delay);
-     groupBoxDelay->setLayout(layout_delay);
-     groupBoxDelay->setMaximumWidth(SETMAXIMUMWIDTH+10);
-     groupBoxDelay->setMaximumHeight(180);
-     groupBoxDelay->setTitle(tr("Delay"));
-     layout->addWidget(groupBoxDelay,0,0);
+
 
  //SIGNAL
      connect(channelSelector , SIGNAL(currentIndexChanged(int)) , this , SLOT(updateEQchannel(int)) );

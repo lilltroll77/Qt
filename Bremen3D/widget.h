@@ -13,11 +13,11 @@
 #include "eqtab.h"
 #include "adctab.h"
 #include "dactab.h"
+#include "maintab.h"
 #include "UDPcommands.h"
 
-//Macro
 
-Q_GLOBAL_STATIC(QStatusBar , statusbar)
+
 
 class Widget : public QWidget
 {
@@ -30,16 +30,29 @@ public:
     EQTab *eq_tab;
     DACTab *dac_tab;
     ADCTab *adc_tab;
+    Network udp;
+
+
     ~Widget();
 
+public slots:
+
 private slots:
-void readDatagram();
+    void readDatagram();
 
 private:
 char datagram_RX[DATAGRAM_RX_MAXLEN];
     QTabWidget *tabWidget;
     QMenuBar *menuBar;
     QMenu *fileMenu;
+    QByteArray datagram;
+    quint16 *port;
+    QHostAddress *IP_RX;
+    QUdpSocket  *UDP_Socket;
+    QHostAddress *IP_XMOS;
+    QHostAddress *IP_LOCAL;
+    quint16 *port_XMOS;
+
 };
 
 #endif // WIDGET_H

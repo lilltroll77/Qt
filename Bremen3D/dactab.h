@@ -11,14 +11,14 @@
 #include <QStatusBar>
 #include <QUdpSocket>
 #include "classes/knob.h"
-
+#include "UDPcommands.h"
 
 
 class DACGain: public QWidget
 {
     Q_OBJECT
 public:
-    explicit DACGain(QWidget *parent = 0);
+    explicit DACGain(QWidget *parent = 0, Network *udp = 0);
     void setBoxTitle(const QString &title);
     void setChannelAlias(const QString & text);
     void setChannelID(int ID);
@@ -29,9 +29,6 @@ public:
 
 
 signals:
-    void gainChanged(double);
-    void muteButton_Clicked(bool);
-    void invertButton_Clicked(bool);
 
 public slots:
     void slot_muteButton_Clicked(bool state);
@@ -40,10 +37,13 @@ public slots:
 
 private:
 int channelID;
-QByteArray datagram;
 QVBoxLayout *topLayout;
 QVBoxLayout *layout;
 QGroupBox *groupBoxChannel;
+QUdpSocket  *UDP_Socket;
+QHostAddress *IP_XMOS;
+quint16 *port_XMOS;
+QByteArray datagram;
 
 };
 
@@ -51,7 +51,7 @@ class DACTab : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DACTab(QWidget *parent = 0);
+    explicit DACTab(QWidget *parent = 0 , Network *udp =0);
     QStatusBar *statusbar;
     DACGain *channel[8];
 

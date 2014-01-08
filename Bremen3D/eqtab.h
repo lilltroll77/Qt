@@ -13,20 +13,23 @@ class EQTab : public QWidget
 {
     Q_OBJECT
 public:
-    explicit EQTab(QWidget *parent = 0);
+    explicit EQTab(QWidget *parent = 0 , Network *udp =0);
     EQChannel *channel[8];
-
+    Knob *knob_linkedFc;
     QCustomPlot *plot;
 
 public slots:
 void slot_linkchannel(int channel);
 void slot_updatePlot(int newChannel);
+void slot_linkedFcChanged(double value);
 
 private:
     QTabWidget *channelTabs;
     QGridLayout *layout;
     int activeChannel;
     QVector<double> *f;
+    QGroupBox *box_linkedFc;
+    QVBoxLayout *layout_linkedFc;
 };
 
   // *****************************************************

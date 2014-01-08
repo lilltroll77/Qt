@@ -2,9 +2,14 @@
 #include "mainwindow.h"
 
 
-DACGain::DACGain(QWidget *parent) :
+DACGain::DACGain(QWidget *parent ,  Network *udp) :
     QWidget(parent)
 {
+
+    UDP_Socket =    udp->UDP_Socket;
+    IP_XMOS =       udp->IP_XMOS;
+    port_XMOS =     udp->port_XMOS;
+
     topLayout = new QVBoxLayout;
     layout = new QVBoxLayout;
     groupBoxChannel = new QGroupBox;
@@ -29,10 +34,6 @@ DACGain::DACGain(QWidget *parent) :
     invertButton->setText(tr("Invert"));
     invertButton->setToolTip(tr("DAC Output Polarity"));
 
-    connect(muteButton , SIGNAL(toggled(bool)) , this , SLOT(slot_muteButton_Clicked(bool)));
-    connect(invertButton , SIGNAL( toggled(bool)) , this , SLOT(slot_invertButton_Clicked(bool)));
-    connect(knob, SIGNAL(valueChanged(double)) , this , SLOT(slot_gainChanged(double)));
-
     layout->addWidget(channelAlias);
     layout->addWidget(knob);
     layout->addWidget(invertButton);
@@ -43,6 +44,11 @@ DACGain::DACGain(QWidget *parent) :
     groupBoxChannel->setSizePolicy( QSizePolicy::Maximum,QSizePolicy::Maximum );
     groupBoxChannel->setContentsMargins(2,2,2,2);
     topLayout->addWidget(groupBoxChannel);
+
+//SIGNALS
+    connect(muteButton      , SIGNAL(toggled(bool))         , this , SLOT(slot_muteButton_Clicked(bool)));
+    connect(invertButton    , SIGNAL( toggled(bool))        , this , SLOT(slot_invertButton_Clicked(bool)));
+    connect(knob            , SIGNAL(valueChanged(double))  , this , SLOT(slot_gainChanged(double)));
 
     setLayout(topLayout);
 }
@@ -67,29 +73,38 @@ void DACGain::slot_muteButton_Clicked(bool state){
          muteButton->setText(tr("MUTE"));
          muteButton->setStyleSheet("color: rgb(0, 0, 0)");
        }
-    emit muteButton_Clicked(state);
-    }
+     datagram.clear();
+     datagram.append(QString("Channel %1 MUTE = %2").arg(channelID).arg(state) );
+     WRITEDATAGRAM
+}
 
 void DACGain::slot_invertButton_Clicked(bool state){
-     if(state)
+    datagram.clear();
+    if(state)
        {
            invertButton->setText(tr("Inverted"));
            invertButton->setStyleSheet("color: rgb(0, 0, 255)");
+           datagram.append(QString("Channel %1 Inverted polarity").arg(channelID) );
         }else{
            invertButton->setText(tr("Invert"));
            invertButton->setStyleSheet("color: rgb(0, 0, 0)");
+           datagram.append(QString("Channel %1 Normal polarity").arg(channelID) );
      }
-    emit invertButton_Clicked(state);
+    QHostAddress *adress= new QHostAddress("127.0.0.1");
+    UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *adress,  XMOS_PORT);
+   // WRITEDATAGRAM
 }
 
  void DACGain::slot_gainChanged(double gain){
-     emit gainChanged(gain);
+     datagram.clear();
+     datagram.append(QString("Volume changed to %2 on Channel %1 ").arg(channelID).arg(gain));
+     WRITEDATAGRAM
  }
 
 
 //***************************************************************************'
 
-DACTab::DACTab(QWidget *parent) :
+DACTab::DACTab(QWidget *parent ,  Network *udp) :
     QWidget(parent)
 {
     QString aliasText[8] ={"Left" , "Right" , "Center" , "Rear"};
@@ -99,7 +114,7 @@ DACTab::DACTab(QWidget *parent) :
     groupBox = new QGroupBox;
 
     for(int i=0 ; i<8 ; i++){
-        channel[i] = new DACGain;
+        channel[i] = new DACGain(this , udp);
         channel[i]->setBoxTitle(QString("Ch %1").arg(i));
         channel[i]->setChannelAlias(aliasText[i]);
         channel[i]->setChannelID(i);

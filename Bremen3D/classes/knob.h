@@ -30,7 +30,7 @@ void valueChanged(double Value);
 
 public slots:
 void dial_changed(int value);
-void spinbox_changed(double value);
+void spinbox_changed();
 void setDisabled(bool state);
 
 

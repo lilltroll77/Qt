@@ -14,8 +14,8 @@
 #include <QLineEdit>
 #include <QSignalMapper>
 #include <QStatusBar>
-#include "UDPcommands.h"
 #include "classes/knob.h"
+#include "UDPcommands.h"
 
 
 class MainTab : public QWidget
@@ -23,11 +23,8 @@ class MainTab : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainTab(QWidget *parent = 0);
+    explicit MainTab(QWidget *parent = 0 ,  Network *udp =0);
     QStatusBar *statusbar;
-    //QUdpSocket *udpSocket;
-    //QHostAddress IP;
-    quint16 *port;
     Knob *knob_bremen3D;
 
     //Widgets width public acess
@@ -36,12 +33,19 @@ public:
 signals:
 
 private slots:
-void generateDatagram(int command);
+void slot_volumesliderChanged(int value);
+void slot_volumeSpinboxChanged(int value);
+void slot_mutebuttonToggled(bool state);
+void slot_inputselectorChanged(int index);
+void slot_synctoXMOS();
+void slot_syncFromXMOS();
+void slot_pingXMOS();
+void slot_programChanged(int index);
+void slot_effectChanged(double value);
 
 private:
     int currentProgram;
     QStatusBar *toplevel_statusbar;
-    QByteArray datagram;
     QSignalMapper *signal_mapper;
     QGridLayout *top_layout;
 
@@ -50,6 +54,7 @@ private:
     QGroupBox *box_volume;
     QPushButton *buttonMute;
     QAction *muteButton_ClickedAction;
+    QSpinBox *spinbox_volume;
 
     //EthernetBox
     QGroupBox *box_ethernet;
@@ -69,17 +74,15 @@ private:
     QGroupBox *box_input;
     QComboBox *input_selector;
 
-    //Crossover box
-    QGroupBox *box_crossover;
-    Knob *knob_crossover;
-    QVBoxLayout *crossoverLayout;
-
     //Mixer box
     QGroupBox *box_mixer;
 
     QVBoxLayout *mixerLayout;
 
-
+    QUdpSocket  *UDP_Socket;
+    QHostAddress *IP_XMOS;
+    quint16 *port_XMOS;
+    QByteArray datagram;
 
 };
 

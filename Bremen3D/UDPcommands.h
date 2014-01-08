@@ -5,15 +5,20 @@
 
 #define XMOS_IPADRESS "127.0.0.1"
 #define LOCAL_IPADRESS "127.0.0.1"
+#define RX_IPADRESS "127.0.0.1"
 #define LOCAL_PORT 2222
 #define XMOS_PORT 2223
 
-Q_GLOBAL_STATIC(QUdpSocket , UDP_Socket)
-Q_GLOBAL_STATIC(QHostAddress , IP_XMOS)
-Q_GLOBAL_STATIC(QHostAddress , IP_LOCAL)
-Q_GLOBAL_STATIC(QHostAddress , IP_RX)
-
 #define DATAGRAM_RX_MAXLEN 1024
+#define WRITEDATAGRAM UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+
+struct Network{
+    QUdpSocket  *UDP_Socket;
+    QHostAddress *IP_XMOS;
+    QHostAddress *IP_LOCAL;
+    QHostAddress *IP_RX;
+    quint16 *port_XMOS;
+};
 
 enum UDPcommands{MUTE_ALL,
                  MASTERVOLUME,

@@ -80,12 +80,13 @@ Knob::Knob(QWidget *parent ,const Scale scaletype) :
         setLayout(layout);
 
         connect(dial,   SIGNAL(valueChanged(int))      , this , SLOT(dial_changed(int)) );
-        connect(spinbox,SIGNAL(valueChanged(double))  , this , SLOT(spinbox_changed(double)) );
+        connect(spinbox , SIGNAL(editingFinished())    , this , SLOT(spinbox_changed()) );
     }
 }
 //SLOTS
 void Knob::dial_changed(int value){
     updateSpinboxValue(dial , spinbox , scale);
+    emit valueChanged(spinbox->value() );
     //Only update if dial is pressed,
   /*  int mid = dial->maximum() >>1;
     int max = dial->maximum();
@@ -118,10 +119,10 @@ void Knob::dial_changed(int value){
       }*/
 }
 
-void Knob::spinbox_changed(double value){
+void Knob::spinbox_changed(){
     dial->blockSignals(true);
     updateDialPosition(dial , spinbox , scale);
-    emit valueChanged(value);
+    emit valueChanged(spinbox->value() );
     dial->blockSignals(false);
 }
 

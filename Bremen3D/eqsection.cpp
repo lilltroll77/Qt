@@ -1,11 +1,17 @@
 #include "eqsection.h"
 #include "eqtab.h" // to acess static f and ejw
+#include "widget.h"
 
-EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
+EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp ):
       QWidget(parent)
   {
       plot = new_plot;
-    //Defaults for tracer
+
+      UDP_Socket = udp->UDP_Socket;
+      IP_XMOS = udp->IP_XMOS;
+      port_XMOS = udp->port_XMOS;
+
+      //Defaults for tracer
       eqTracer = new QCPItemTracer(plot);
       eqTracer->setSize(7);
       eqTracer->setStyle(QCPItemTracer::tsCircle);
@@ -115,14 +121,14 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
       updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("EQ Gain changed to %1 at EQsection %2 on ch %3").arg(gain).arg(sectionID).arg(channelID));
-      UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+      WRITEDATAGRAM
   }
 
   void EQSection::slot_Q_Changed(double Q){
       updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("EQ Q changed to %1 at EQsection %2 on ch %3").arg(Q).arg(sectionID).arg(channelID));
-      UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+      WRITEDATAGRAM
 
   }
 
@@ -132,7 +138,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
 
       datagram.clear();
       datagram.append(QString("EQ fc changed to %1 at EQsection %2 on ch %3").arg(fc).arg(sectionID).arg(channelID));
-      UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+      WRITEDATAGRAM
   }
 
   void EQSection::slot_filtertypeChanged(int type){
@@ -144,7 +150,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
       updateSettingsAndPlot(true);
       datagram.clear();
       datagram.append(QString("Filtertype changed to %1 at EQsection %2 on ch %3").arg(type).arg(sectionID).arg(channelID));
-      UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+      WRITEDATAGRAM
   }
 
   void EQSection::slot_linkStatusChanged(bool state){
@@ -158,6 +164,6 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot):
 
        datagram.clear();
        datagram.append(QString("EQsection %2 on ch %3 changed state to %1").arg(state).arg(sectionID).arg(channelID));
-       UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+       WRITEDATAGRAM
 
   }

@@ -1,8 +1,13 @@
 #include "eqchannel.h"
-EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref ) :
+EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, Network *udp ) :
     QWidget(parent){
+
     plot=plot_ref;
     channel=new_channel;
+
+    UDP_Socket = udp->UDP_Socket;
+    IP_XMOS = udp->IP_XMOS;
+
     scrollArea = new QScrollArea(this);
     pen = new QPen(color , 1 , (Qt::DotLine) );
     scrollArea -> setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -10,6 +15,23 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref ) 
     scrollArea -> setFixedHeight(375);
     scrollArea -> setMaximumWidth(1000);
     scrollArea -> setMinimumWidth(200);
+
+    //   DELAY
+    knob_delay  = new Knob(this, linScale);
+    knob_delay -> setTitle("t [ms]");
+    knob_delay -> setKnobColor("rgb(255, 200, 127)");
+    knob_delay -> setRange(0,20,100);
+    knob_delay -> setDecimals(3);
+    knob_delay -> setSingleStep(0.001);
+    connect(knob_delay , SIGNAL(valueChanged(double)) , this , SLOT(slot_delayChanged(double)) );
+
+    layout_delay = new QHBoxLayout;
+    layout_delay->addWidget(knob_delay);
+    box_delay = new QGroupBox;
+    box_delay->setLayout(layout_delay);
+    box_delay->setMaximumWidth(SETMAXIMUMWIDTH+10);
+    box_delay->setMaximumHeight(130);
+    box_delay->setTitle(tr("Delay"));
 
     Hmag.fill(0,PLOTSIZE);
     color.setHsv(32*new_channel,255,255);
@@ -19,8 +41,10 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref ) 
     plot->graph(channel)->setData( *(f_ref() ), Hmag);
     pen->setStyle(Qt::SolidLine); //update style for eqtracer
     layout_eqsections = new QHBoxLayout;
+    layout_eqsections->addWidget(box_delay);
+
     for(int section=0 ; section<8 ;section++){
-         eqSection[section]=new EQSection(this , plot);
+         eqSection[section]=new EQSection(this , plot , udp);
          eqSection[section]->setBoxTitle(QString("Filter %1").arg(section));
          eqSection[section]->setSectionID(section);
          eqSection[section]->setChannelID(new_channel);
@@ -51,6 +75,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref ) 
          }
      connect(mapper , SIGNAL(mapped(int)) , parent , SLOT(slot_linkchannel(int)) );
      linkChannel[channel]->setDisabled(true);
+
      setLayout(layout);
 
 
@@ -74,7 +99,11 @@ void EQChannel::disableGraph(){
     plot->replot();
 }
 
-
+void EQChannel::slot_delayChanged(double delay){
+    datagram.clear();
+    datagram.append(QString("EQ delay changed to %1 ch %2").arg(delay).arg(channel));
+    WRITEDATAGRAM
+}
 
 void EQChannel::recalc_graph(){
     bool state;

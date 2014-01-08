@@ -13,7 +13,6 @@
 #include <QMessageBox>
 
 
-
 struct EQSection_t{
     bool active=false;
     FilterType type;
@@ -42,6 +41,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
+    QStatusBar *statusbar;
     ~MainWindow();
 
 signals:
@@ -64,7 +64,9 @@ Widget *central_widget;
 QMenu *fileMenu;
 QMenu *helpMenu;
 QAction *openAction;
+QAction *openActionToolbar;
 QAction *saveAsAction;
+QAction *saveAsActionToolbar;
 QAction *saveAction;
 QAction *exitAction;
 QAction *aboutAction;

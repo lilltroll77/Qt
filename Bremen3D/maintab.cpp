@@ -1,10 +1,14 @@
 #include "maintab.h"
-#include "mainwindow.h"
-#include "UDPcommands.h"
+#include <QDebug>
 
-MainTab::MainTab(QWidget *parent) :
+
+
+MainTab::MainTab(QWidget *parent ,  Network *udp) :
     QWidget(parent){
 
+    UDP_Socket = udp->UDP_Socket;
+    IP_XMOS = udp->IP_XMOS;
+    port_XMOS = udp->port_XMOS;
 
     toplevel_statusbar=statusbar;
     top_layout = new QGridLayout;
@@ -13,33 +17,32 @@ MainTab::MainTab(QWidget *parent) :
 //Volume box
     layout_volume = new QVBoxLayout;
     box_volume = new QGroupBox;
+    spinbox_volume = new QSpinBox;
+    spinbox_volume->setRange(-100,0);
+    spinbox_volume->setFixedWidth(60);
+    spinbox_volume->setAlignment(Qt::AlignCenter);
     slider_MasterVolume = new QSlider;
     slider_MasterVolume->setToolTip(tr("Master Volume"));
     slider_MasterVolume->setRange(-100,0);
-    slider_MasterVolume->setFixedHeight(220);
+    slider_MasterVolume->setFixedHeight(200);
     slider_MasterVolume->setFixedWidth(60);
-    slider_MasterVolume->setTickInterval(20);
+    slider_MasterVolume->setTickInterval(10);
     slider_MasterVolume->setTickPosition(QSlider::TicksBothSides);
-//SIGNAL
-    //signal_mapper->setMapping(slider_MasterVolume , MASTERVOLUME);
-    //connect(slider_MasterVolume , SIGNAL(valueChanged(int)) , signal_mapper , SLOT(map()) );
 
 //Mute button
     buttonMute = new QPushButton(tr("MUTE"));
     buttonMute ->setFixedWidth(60);
     buttonMute ->setCheckable(true);
-//SIGNAL
-   // signal_mapper->setMapping(buttonMute ,MUTE_ALL);
-   // connect(buttonMute , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
 
     layout_volume ->addWidget(slider_MasterVolume);
+    layout_volume ->addWidget(spinbox_volume);
     layout_volume ->addWidget(buttonMute);
     box_volume->setLayout(layout_volume);
     box_volume->setTitle(tr("Master Volume"));
-    box_volume->setFixedSize(86,300);
+    box_volume->setFixedSize(86,350);
     box_volume->setAlignment(Qt::AlignHCenter);
 
-
+//******************************************************************************
 //Input selector box
     box_input = new QGroupBox;
     input_selector = new QComboBox;
@@ -49,10 +52,6 @@ MainTab::MainTab(QWidget *parent) :
     input_selector->addItem(tr("ANALOG"),QVariant(2));
     input_selector->setContentsMargins(5,5,5,5);
     input_selector->setMaximumWidth(75);
-//SINGAL
-    //signal_mapper->setMapping(input_selector , INPUT_SOURCE);
-    //connect(input_selector , SIGNAL(currentIndexChanged(int)) , signal_mapper , SLOT(map()) );
-
     box_layout->addWidget(input_selector);
     box_input->setToolTip(tr("Input selector"));
     box_input->setTitle(tr("Input selector"));
@@ -73,14 +72,6 @@ MainTab::MainTab(QWidget *parent) :
     buttonSyncFromXMOS->setFixedWidth(100);
     buttonSyncToXMOS->setFixedWidth(100);
     buttonPingXMOS->setFixedWidth(100);
-//SIGNAL
-  //  signal_mapper->setMapping(buttonPingXMOS , PING );
-  //  connect(buttonPingXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-  //  signal_mapper->setMapping(buttonSyncFromXMOS , SYNC_FROM_XMOS );
-  //  connect(buttonSyncFromXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-  //  signal_mapper->setMapping(buttonSyncToXMOS , SYNC_TO_XMOS );
-  //  connect(buttonSyncToXMOS , SIGNAL(clicked()) , signal_mapper , SLOT(map()) );
-
 
     lineEditXMOSIP->setToolTip("IP Adress of XMOS box");
     lineEditXMOSIP->setText(QString("IP: %1").arg(XMOS_IPADRESS));
@@ -105,50 +96,16 @@ MainTab::MainTab(QWidget *parent) :
     programLayout = new QGridLayout;
     for(int i=0; i<4 ;i++){
         radiobuttons[i] = new QRadioButton(QString("Program %1").arg(i));
-        radiobuttons[i]->setFixedWidth(100);
-
-        //openbuttons[i] = new QPushButton(tr("Open"));
-        //openbuttons[i]->setFixedWidth(40);
-
-        programLayout->addWidget(radiobuttons[i],i,1);
-        //programLayout->addWidget(openbuttons[i],i,0);
-
-//SIGNALS
+        radiobuttons[i]->setFixedWidth(100);programLayout->addWidget(radiobuttons[i],i,1);
         signal_mapper->setMapping(radiobuttons[i] , i);
+//SIGNALMAPPER
         connect(radiobuttons[i] , SIGNAL(clicked(bool)) , signal_mapper , SLOT(map()) );
    }
-    //QObject *test = this->parent()->parent();
-
-    connect(signal_mapper, SIGNAL(mapped(int)) ,  this->parent()->parent() , SLOT(programChanged(int)) );
     box_program->setLayout(programLayout);
-
-
-
- //Crossover box
-    knob_crossover = new Knob(this ,logScale );
-    box_crossover = new QGroupBox;
-    crossoverLayout = new QVBoxLayout;
-    knob_crossover-> setTitle("Fc [Hz]");
-    knob_crossover-> setKnobColor("rgb(255, 127, 127)");
-    knob_crossover->setRange(20,2500,100);
-    knob_crossover->setDecimals(0);
-    knob_crossover->setSingleStep(1);
-    knob_crossover->setValue(80);
-    crossoverLayout->addWidget(knob_crossover);
-    box_crossover->setTitle(tr("Crossover"));
-    box_crossover->setToolTip(tr("Crossover / linked center frequency"));
-    box_crossover->setLayout(crossoverLayout);
-    box_crossover->setMaximumHeight(200);
-    box_crossover->setMaximumWidth(120);
-    //SIGNALS
-    //signal_mapper->setMapping(knob_crossover , CROSSOVER_FREQ);
-    //connect(knob_crossover , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
 
 
     //Mixer Box
     knob_bremen3D = new Knob(this , linScale);
-    //knob_bremen3D ->setProperty("program" , QVariant());
-    //knob_bremen3D ->setUserData(0,QObjectUserData());
     box_mixer = new QGroupBox;
     mixerLayout = new QVBoxLayout;
     knob_bremen3D-> setTitle("Bremen 3D [%]");
@@ -163,64 +120,96 @@ MainTab::MainTab(QWidget *parent) :
     box_mixer->setLayout(mixerLayout);
     box_mixer->setMaximumHeight(200);
     box_mixer->setMaximumWidth(120);
-//SIGNAL
-   // connect(knob_bremen3D , SIGNAL(valueChanged(double)) , signal_mapper , SLOT(map()) );
 
     // Top layout
-
-    top_layout->addWidget(box_input,1,2,Qt::AlignBottom);
+    top_layout->addWidget(box_input,0,1);
     top_layout->addWidget(box_program,0,0);
     top_layout->addWidget(box_ethernet,1,0);
-    top_layout->addWidget(box_crossover,0,1);
     top_layout->addWidget(box_mixer,1,1);
     top_layout->addWidget(box_volume,0,2 ,2,1);
 
-    // connect(reportFileButton, &QPushButton::clicked,signalMapper, &QSignalMapper::map);
-
-
+    //SIGNAL
+    connect(slider_MasterVolume ,   SIGNAL(valueChanged(int))       , this ,    SLOT(slot_volumesliderChanged(int) ) );
+    connect(spinbox_volume      ,   SIGNAL(valueChanged(int))       , this ,    SLOT(slot_volumeSpinboxChanged(int)) );
+    connect(buttonMute ,            SIGNAL(toggled(bool))           , this ,    SLOT(slot_mutebuttonToggled(bool)) );
+    connect(knob_bremen3D ,         SIGNAL(valueChanged(double))    , this ,    SLOT(slot_effectChanged(double))  );
+    connect(buttonPingXMOS ,        SIGNAL(clicked())               , this ,    SLOT(slot_pingXMOS() ) );
+    connect(buttonSyncFromXMOS ,    SIGNAL(clicked())               , this ,    SLOT(slot_syncFromXMOS()));
+    connect(buttonSyncToXMOS ,      SIGNAL(clicked())               , this ,    SLOT(slot_synctoXMOS()));
+    connect(input_selector ,        SIGNAL(currentIndexChanged(int)), this ,    SLOT( slot_inputselectorChanged(int)) );
+    //connect(signal_mapper,          SIGNAL(mapped(int))             , this->parent()->parent() , SLOT(programChanged(int)) );
+    connect(signal_mapper,          SIGNAL(mapped(int))             , this ,    SLOT(slot_programChanged(int)));
 
 
     setLayout(top_layout);
 
 }
 
-
-
-void MainTab::generateDatagram(int command){
-    datagram.clear();
-    switch(command){
-    case MASTERVOLUME:
-        datagram.append(QString("Volume: %1").arg(slider_MasterVolume->value()));
-    break;
-    case MUTE_ALL:
+void MainTab::slot_mutebuttonToggled(bool state){
+    QFont font;
+    if(state){
+        font.setBold(true);
+        buttonMute->setText(tr("MUTED"));
+        buttonMute->setFont(font);
+        buttonMute->setStyleSheet("color: rgb(255, 0, 0)");
+        datagram.clear();
         datagram.append("MUTE ALL");
-        break;
-    case INPUT_SOURCE:
-        datagram.append(QString("INPUT changed to %1").arg(input_selector->currentIndex()) );
-        break;
-    case PING:
-        datagram.append("PING");
-        break;
-    case SYNC_FROM_XMOS:
-        datagram.append("SYNC_FROM_XMOS");
-        break;
-    case SYNC_TO_XMOS:
-        datagram.append("SYNC_TO_XMOS");
-        break;
-    case PROGRAM_CHANGED:
-        for(int i=0 ;i<4 ;i++){
-            if(radiobuttons[i]->isChecked()==true)
-                datagram.append(QString("PROGRAM %1 SELECTED").arg(i));
-        }
-
-        break;
-    case CROSSOVER_FREQ:
-        datagram.append(QString("CROSSOVER frequency:  %1 ").arg(knob_crossover->Value() ) );
-        break;
-    case MIXERVALUE:
-        datagram.append(QString("MIXER: %1").arg(knob_bremen3D->Value()) );
-        break;
     }
-     UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
+    else{
+        font.setBold(false);
+        buttonMute->setText(tr("MUTE"));
+        buttonMute->setFont(font);
+        buttonMute->setStyleSheet("color: rgb(0, 0, 0)");
+        datagram.clear();
+        datagram.append("UNMUTE ALL");
+    }
+   WRITEDATAGRAM
+}
 
+void MainTab::slot_volumesliderChanged(int value){
+    spinbox_volume->setValue(value);
+    datagram.clear();
+    datagram.append(QString("Volume changed to %1").arg(value));
+    }
+
+void MainTab::slot_volumeSpinboxChanged(int value){
+    slider_MasterVolume->setValue(value);
+    datagram.clear();
+    datagram.append(QString("Volume changed to %1").arg(value));
+    WRITEDATAGRAM
+}
+
+void MainTab::slot_effectChanged(double value){
+    datagram.clear();
+    datagram.append(QString("Bremen3D changed to %1 %").arg(value));
+    WRITEDATAGRAM
+}
+
+void MainTab::slot_programChanged(int index){
+     datagram.clear();
+     datagram.append(QString("PROGRAM %1 SELECTED").arg(index));
+     WRITEDATAGRAM
+}
+
+void MainTab::slot_pingXMOS(){
+    datagram.clear();
+    datagram.append("PING");
+    WRITEDATAGRAM
+}
+void MainTab::slot_syncFromXMOS(){
+    datagram.clear();
+    datagram.append("SYNC FROM XMOS");
+    WRITEDATAGRAM
+}
+
+void MainTab::slot_synctoXMOS(){
+    datagram.clear();
+    datagram.append("SYNC TO XMOS");
+    WRITEDATAGRAM
+}
+
+void MainTab::slot_inputselectorChanged(int index){
+    datagram.clear();
+    datagram.append(QString("INPUT changed to %1").arg(index) );
+    WRITEDATAGRAM
 }

@@ -3,8 +3,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    QDate date = QDate::currentDate();
+
     msgBoxAbout = new QMessageBox;
-    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION));
+    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(date.toString("yyyy-MM-dd")) );
     msgBoxAbout->setFixedWidth(640);
     msgBoxAbout->setFixedHeight(480);
     msgBoxAbout->setWindowTitle(tr("About"));
@@ -19,17 +21,16 @@ MainWindow::MainWindow(QWidget *parent) :
     //QIcon(":/images/new.png")
 
     openAction = fileMenu->addAction(tr("&Open ..."));
-    connect(openAction,SIGNAL(triggered()),this,SLOT(slot_open()) );
+    connect(openAction,SIGNAL(triggered()),this, SLOT(slot_open()) );
 
     saveAsAction = fileMenu->addAction(tr("&Save as..."));
     connect(saveAsAction , SIGNAL(triggered()),this,SLOT(slot_saveas()) );
 
     exitAction = fileMenu->addAction(tr("E&xit"));
-    connect(exitAction , SIGNAL(triggered()),this,SLOT(close()) ) ;
-
+    connect(exitAction , SIGNAL(triggered()),this, SLOT( close()) ) ;
 
     aboutAction= helpMenu->addAction(tr("&About"));
-    connect(aboutAction , SIGNAL(triggered()),this,SLOT(slot_about()) );
+    connect(aboutAction , SIGNAL(triggered()),this, SLOT(slot_about()) );
 
 
     menubar->addMenu(fileMenu);
@@ -38,10 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*** STAUS BAR ***/
 
-        statusbar->setObjectName("statusbar");
-        statusbar->showMessage(tr("Not connected"));
-        setStatusBar(statusbar);
-        setWindowTitle("Alfa release");
+    statusbar = new QStatusBar;
+    statusbar->setObjectName("statusbar");
+    statusbar->showMessage(tr("Not connected"));
+    setStatusBar(statusbar);
+    setWindowTitle("Alfa release");
 
 
     /*** CENTRAL WIDGET ***/
@@ -60,9 +62,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowIcon(*mainIcon);
 
     fileToolBar = addToolBar(tr("File"));
-    openAction=fileToolBar->addAction(*openIcon,tr("Open File"));
-    saveAction=fileToolBar->addAction(*saveIcon,tr("Save File"));
-    /*syncAction=*/fileToolBar->addAction(*syncIcon,tr("Sync with XMOS"));
+    openActionToolbar=fileToolBar->addAction(*openIcon,tr("Open File"));
+    connect(openActionToolbar , SIGNAL(triggered()),this, SLOT(slot_open()) );
+
+    saveAsActionToolbar=fileToolBar->addAction(*saveIcon,tr("Save File"));
+    connect(saveAsActionToolbar , SIGNAL(triggered()),this,SLOT(slot_saveas()) );
+
+    fileToolBar->addAction(*syncIcon,tr("Sync with XMOS"));
     //
     currentProgram=0;
     central_widget->main_tab->radiobuttons[currentProgram]->setChecked(true);
@@ -74,8 +80,7 @@ void MainWindow::slot_about(){
 }
 
 void MainWindow::programChanged(int new_program){
-    ///Tell XMOS to MUTE and then change program and thereafter save new settings, finally unmute
-    programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
+     programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
     central_widget->main_tab->knob_bremen3D->setValue( programSettings[new_program].mixer );  //Fetch new
     for(int ch=0 ; ch< CHANNELS ; ch++){
     //DAC Gain
