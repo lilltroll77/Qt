@@ -55,10 +55,12 @@ private slots:
 void slot_about();
 void slot_saveas();
 void slot_open();
+void slot_graph_options();
 
 private:
 int currentProgram;
 QMessageBox *msgBoxAbout;
+QMessageBox msgBoxGraph;
 QMessageBox msgBoxError;
 QMenuBar *menubar;
 QToolBar *fileToolBar;
@@ -73,6 +75,7 @@ QAction *saveAction;
 QAction *exitAction;
 QAction *aboutAction;
 QAction *plotAction;
+QAction *graphAction;
 Settings_t programSettings[4];
 
 };

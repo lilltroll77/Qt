@@ -16,7 +16,8 @@ public:
     explicit EQTab(QWidget *parent = 0 , Network *udp =0);
     EQChannel *channel[8];
     Knob *knob_linkedFc;
-    QCustomPlot *plot;
+    QCustomPlot *plotMag;
+    QCustomPlot *plotPhase;
 
 public slots:
 void slot_linkchannel(int channel);

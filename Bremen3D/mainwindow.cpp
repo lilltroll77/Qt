@@ -11,13 +11,19 @@ MainWindow::MainWindow(QWidget *parent) :
     msgBoxAbout->setFixedHeight(480);
     msgBoxAbout->setWindowTitle(tr("About"));
 
-
+    QCheckBox *cb = new QCheckBox("Show phase");
+    msgBoxGraph.setCheckBox(cb);
+    //msgBoxGraph.set
+    msgBoxGraph.setFixedWidth(640);
+    msgBoxGraph.setFixedHeight(480);
+    msgBoxGraph.setWindowTitle(tr("Graph options"));
 
 /*** MENU BAR ***/
     menubar = new QMenuBar(this);
     fileMenu = new QMenu(tr("&File"), this);
     fileMenu->setObjectName("fileMenu");
     helpMenu = new QMenu(tr("&Help"), this);
+    QMenu *options = new QMenu(tr("&Options"), this);
     //QIcon(":/images/new.png")
 
     openAction = fileMenu->addAction(tr("&Open ..."));
@@ -32,8 +38,11 @@ MainWindow::MainWindow(QWidget *parent) :
     aboutAction= helpMenu->addAction(tr("&About"));
     connect(aboutAction , SIGNAL(triggered()),this, SLOT(slot_about()) );
 
+    graphAction = options->addAction(tr("Graph"));
+    connect(graphAction , SIGNAL(triggered()) ,this , SLOT(slot_graph_options()) );
 
     menubar->addMenu(fileMenu);
+    menubar->addMenu(options);
     menubar->addMenu(helpMenu);
     setMenuBar(menubar);
 
@@ -77,6 +86,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::slot_about(){
    msgBoxAbout->exec();
+}
+
+void MainWindow::slot_graph_options(){
+    msgBoxGraph.exec();
 }
 
 void MainWindow::programChanged(int new_program){
@@ -216,7 +229,7 @@ void MainWindow::slot_open(){
     }
   }
     file.close();
-    central_widget->eq_tab->plot->update();
+    central_widget->eq_tab->plotMag->update();
 }
 
 

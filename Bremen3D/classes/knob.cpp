@@ -80,7 +80,7 @@ Knob::Knob(QWidget *parent ,const Scale scaletype) :
         setLayout(layout);
 
         connect(dial,   SIGNAL(valueChanged(int))      , this , SLOT(dial_changed(int)) );
-        connect(spinbox , SIGNAL(editingFinished())    , this , SLOT(spinbox_changed()) );
+        connect(spinbox , SIGNAL(valueChanged(double)) , this , SLOT(spinbox_changed()) );
     }
 }
 //SLOTS
@@ -162,7 +162,9 @@ void Knob::setRange(double min , double max , int steps){
 
 void Knob::setValue(double arg){
    spinbox->setValue(arg);
+   dial->blockSignals(true);
    updateDialPosition(dial , spinbox , scale);
+   dial->blockSignals(false);
 }
 
 double Knob::Value(){

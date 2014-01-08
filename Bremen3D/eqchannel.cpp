@@ -34,6 +34,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     box_delay->setTitle(tr("Delay"));
 
     Hmag.fill(0,PLOTSIZE);
+    Hdeg.fill(0,PLOTSIZE);
     color.setHsv(32*new_channel,255,255);
     plot->addGraph();
     pen->setColor(color);
@@ -115,9 +116,12 @@ void EQChannel::recalc_graph(){
             for(int i=0 ; i<PLOTSIZE ; i++)
                 Htot[i] *= eqSection[section]->freq[i];
     }
-    for(int i=0 ; i<PLOTSIZE ; i++)
+    for(int i=0 ; i<PLOTSIZE ; i++){
         Hmag[i] = 20*log10((double) abs(Htot[i])) ;
+        Hdeg[i] = 180 / M_PI * arg (Htot[i]);
+    }
     plot->graph(channel)->setData( *(f_ref()), Hmag);
+    //plot->graph(channel)->setData( *(f_ref()), Hdeg);
     plot->replot();
 
 }

@@ -12,7 +12,7 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     channelTabs = new QTabWidget(this);
     layout = new QGridLayout(this);
-    plot = new QCustomPlot(this);
+    plotMag = new QCustomPlot(this);
     activeChannel=0;
 
     init_freqz(FMIN , FS/2);
@@ -29,7 +29,7 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     //Create channel tabs
     for(int i=0 ; i<CHANNELS ;i++){
-        channel[i] = new EQChannel(this , i , plot ,udp ,knob_linkedFc);
+        channel[i] = new EQChannel(this , i , plotMag ,udp ,knob_linkedFc);
         channelTabs->addTab(channel[i] , (QString("%1").arg(i)) );
         connect(channelTabs , SIGNAL(currentChanged(int)) , this , SLOT(slot_updatePlot(int)));
     }
@@ -41,10 +41,6 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     layout->addWidget(channelTabs,0,0);
     layout->setContentsMargins(3,3,3,3);
 
-
-
-
-
     layout_linkedFc = new QVBoxLayout;
     layout_linkedFc->addWidget(knob_linkedFc);
 
@@ -55,29 +51,35 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
      box_linkedFc->setMaximumWidth(80);
     layout->addWidget(box_linkedFc,1,0);
 
-    plot->xAxis->setScaleType(QCPAxis::stLogarithmic);
-    plot->xAxis->setAutoSubTicks(false);
-    plot->xAxis->setSubTickCount(9);
-    plot->xAxis->setLabel("Frequeny [Hz]");
+    plotMag->xAxis->setScaleType(QCPAxis::stLogarithmic);
+    plotMag->xAxis->setAutoSubTicks(false);
+    plotMag->xAxis->setSubTickCount(9);
+    plotMag->xAxis->setLabel("Frequeny [Hz]");
 
-    plot->yAxis->setLabel("Gain [dB]");
-    plot->xAxis->setRange(FMIN , FS/2);
-    plot->yAxis->setRange(-20, 10);
+    plotMag->yAxis->setLabel("Gain [dB]");
+    //plotMag->yAxis2->setVisible(true);
+    //plotMag->yAxis2->setLabel("Phase [deg]");
+    //plotMag->yAxis2->setRange(-180,180);
 
-    plot->yAxis->setAutoTickStep(false);
-    plot->yAxis->setAutoSubTicks(false);
-    plot->yAxis->setTickStep(5);
-    plot->yAxis->setSubTickCount(4);
+    plotMag->xAxis->setRange(FMIN , FS/2);
+    plotMag->yAxis->setRange(-20, 10);
+
+    plotMag->yAxis->setAutoTickStep(false);
+    plotMag->yAxis->setAutoSubTicks(false);
+    plotMag->yAxis->setTickStep(5);
+    plotMag->yAxis->setSubTickCount(4);
     //plot->legend->setUserData();
 
-    plot->replot();
-    layout->addWidget(plot,0,1,2,1);
+    plotMag->replot();
+
+    layout->addWidget(plotMag,0,1,2,1);
     layout->setColumnStretch(0,1);
     layout->setColumnStretch(1,1);
     setLayout(layout);
 }
 
 void EQTab::slot_linkedFcChanged(double value){
+    /// Fix so the update of the plot only happens once
     for(int ch=0 ; ch<CHANNELS ;ch++)
         for(int sec=0 ; sec<SECTIONS ; sec++)
             if(channel[ch]->eqSection[sec]->link->isChecked())
@@ -97,8 +99,8 @@ void EQTab::slot_linkchannel(int val){
     bool state;
     QFont font;
     state = channel[masterCh]->linkChannel[slaveCh]->isChecked();
-     plot->graph(slaveCh)->setVisible(!state);
-     plot->replot();
+     plotMag->graph(slaveCh)->setVisible(!state);
+     plotMag->replot();
 
     for(int ch=0 ; ch< CHANNELS ; ch++){
         channel[slaveCh]->linkChannel[ch]->setVisible(!state);

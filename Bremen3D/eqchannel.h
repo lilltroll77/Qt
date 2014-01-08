@@ -8,6 +8,7 @@
 #include "calcfilt.h"
 #include "eqsection.h"
 #include "defines.h"
+#include <complex.h>
 
 class EQChannel : public QWidget
 {
@@ -37,6 +38,7 @@ QHBoxLayout * layout_eqsections;
 QHBoxLayout * layout_delay;
 std::complex<double> Htot[PLOTSIZE];
 QVector<double> Hmag;
+QVector<double> Hdeg;
 QCustomPlot *plot;
 int channel;
 QColor color;
