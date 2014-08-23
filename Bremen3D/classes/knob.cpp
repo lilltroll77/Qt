@@ -85,7 +85,9 @@ Knob::Knob(QWidget *parent ,const Scale scaletype) :
 }
 //SLOTS
 void Knob::dial_changed(int value){
+    spinbox->blockSignals(true);
     updateSpinboxValue(dial , spinbox , scale);
+    spinbox->blockSignals(false);
     emit valueChanged(spinbox->value() );
     //Only update if dial is pressed,
   /*  int mid = dial->maximum() >>1;

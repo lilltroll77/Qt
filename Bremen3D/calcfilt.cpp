@@ -59,7 +59,17 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
     double alpha=sin(w0)/(2*Q);
     double A = pow(10,GaindB/40);
     double sqA = pow(10,GaindB/20);
+    double p; //prewarp factor
     switch(type){
+    case LowPass1:
+            p = tan(0.5*w0);
+            a0 = 1;
+            a1 = (p-1)/(p+1);
+            a2 = 0;
+            b0 = sqA*p/(p+1);
+            b1 = b0;
+            b2 = 0;
+            break;
     case LowPass :
             b0 = sqA * (1 - cos(w0))/2;
             b1 =  2*b0;
@@ -68,6 +78,15 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
             a1 =  -2*cos(w0);
             a2 =   1 - alpha;
            break;
+    case HighPass1 :
+            p = tan(0.5*w0);
+            a0 = 1;
+            a1 = (p-1)/(p+1);
+            a2 = 0;
+            b0 = sqA*(a0-a1)/2;
+            b1 = -b0;
+            b2 = 0;
+            break;
     case HighPass :
             b0 = sqA* (1 + cos(w0))/2;
             b1 =  -2*b0;

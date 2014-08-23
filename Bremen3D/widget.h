@@ -14,6 +14,7 @@
 #include "adctab.h"
 #include "dactab.h"
 #include "maintab.h"
+#include "mixertab.h"
 #include "UDPcommands.h"
 
 
@@ -26,6 +27,7 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = 0, QStatusBar *statusbar =0);
     int getCurrentTabIndex();
+    MixerTab *mixer_tab;
     MainTab *main_tab;
     EQTab *eq_tab;
     DACTab *dac_tab;

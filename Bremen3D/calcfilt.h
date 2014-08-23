@@ -6,7 +6,7 @@
 #include "defines.h"
 
 
-enum FilterType{LowShelf , HighSelf , PeakingEQ , Notch , AllPass , HighPass , LowPass , BandPass};
+enum FilterType{LowShelf , HighSelf , PeakingEQ , Notch , AllPass ,LowPass1, LowPass, HighPass1, HighPass , BandPass};
 
 QVector<double>* f_ref();
 void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , double Bcoef[3] , double Acoef[2] );

@@ -3,10 +3,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    QDate date = QDate::currentDate();
-
-    msgBoxAbout = new QMessageBox;
-    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(date.toString("yyyy-MM-dd")) );
+        msgBoxAbout = new QMessageBox;
+    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(COMPILEDATE) );
     msgBoxAbout->setFixedWidth(640);
     msgBoxAbout->setFixedHeight(480);
     msgBoxAbout->setWindowTitle(tr("About"));
@@ -80,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolBar->addAction(*syncIcon,tr("Sync with XMOS"));
     //
     currentProgram=0;
-    central_widget->main_tab->radiobuttons[currentProgram]->setChecked(true);
+    //central_widget->main_tab->radiobuttons[currentProgram]->setChecked(true);
 
    }
 
@@ -93,8 +91,8 @@ void MainWindow::slot_graph_options(){
 }
 
 void MainWindow::programChanged(int new_program){
-     programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
-    central_widget->main_tab->knob_bremen3D->setValue( programSettings[new_program].mixer );  //Fetch new
+     //programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
+    //central_widget->main_tab->knob_bremen3D->setValue( programSettings[new_program].mixer );  //Fetch new
     for(int ch=0 ; ch< CHANNELS ; ch++){
     //DAC Gain
        programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].DACgain = central_widget->dac_tab->channel[ch]->knob->Value(); //Store
@@ -174,7 +172,7 @@ void MainWindow::slot_open(){
   quint16 sections;
   int type;
   bool link,active;
-  double fc, Q ,gain , effect, delay;
+  double fc, Q ,gain , delay ,p,k;
   QString displayText;
 
   in >> magic;
@@ -193,8 +191,17 @@ void MainWindow::slot_open(){
   }
   in >> channels;
   in >> sections;
-  in >> effect;
-  central_widget->main_tab->knob_bremen3D->setValue(effect);
+  //in >> effect;
+  //central_widget->main_tab->knob_bremen3D->setValue(effect);
+  in >> p;
+  central_widget->mixer_tab->knob_p->setValue(p);
+
+  in >> type;
+  if(type<=2)
+      central_widget->mixer_tab->radiobuttons_k[type]->setChecked(true);
+  in >> k;
+      central_widget->mixer_tab->knob_k->setValue(k);
+
   in >> fc;
   central_widget->eq_tab->knob_linkedFc->setValue(fc);
 
@@ -234,7 +241,7 @@ void MainWindow::slot_open(){
 
 
 void MainWindow::slot_saveas(){
-
+  int i=0;
   QString fileName;
   QFileDialog *filedialog=new QFileDialog;
   filedialog->setDefaultSuffix("DSPsettings");
@@ -247,7 +254,18 @@ void MainWindow::slot_saveas(){
   //out << QString("Cracy Horse File");
   out << (quint16) CHANNELS;
   out << (quint16) SECTIONS;
-  out << central_widget->main_tab->knob_bremen3D->Value();
+  //out << central_widget->main_tab->knob_bremen3D->Value();
+
+  out << central_widget->mixer_tab->knob_p->Value();
+
+  bool state=false;
+  while(state==false){
+    state=central_widget->mixer_tab->radiobuttons_k[i]->isChecked();
+    i++;
+  }
+  out <<i ;
+  out << central_widget->mixer_tab->knob_k->Value();
+
   out << central_widget->eq_tab->knob_linkedFc->Value();
 
   for(int ch=0 ; ch<CHANNELS ; ch++){
@@ -270,6 +288,7 @@ void MainWindow::slot_saveas(){
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
   }
 }
+
 
   file.close();
 }

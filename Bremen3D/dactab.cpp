@@ -74,30 +74,34 @@ void DACGain::slot_muteButton_Clicked(bool state){
          muteButton->setStyleSheet("color: rgb(0, 0, 0)");
        }
      datagram.clear();
-     datagram.append(QString("Channel %1 MUTE = %2").arg(channelID).arg(state) );
+     datagram[0]= MUTE_CHANNEL;
+     datagram[1]= state;
+     datagram[2]=channelID;
      WRITEDATAGRAM
 }
 
 void DACGain::slot_invertButton_Clicked(bool state){
-    datagram.clear();
     if(state)
        {
            invertButton->setText(tr("Inverted"));
            invertButton->setStyleSheet("color: rgb(0, 0, 255)");
-           datagram.append(QString("Channel %1 Inverted polarity").arg(channelID) );
         }else{
            invertButton->setText(tr("Invert"));
            invertButton->setStyleSheet("color: rgb(0, 0, 0)");
-           datagram.append(QString("Channel %1 Normal polarity").arg(channelID) );
-     }
-    QHostAddress *adress= new QHostAddress("127.0.0.1");
-    UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *adress,  XMOS_PORT);
-   // WRITEDATAGRAM
+    }
+    datagram.clear();
+    datagram[0]= INVERT_DAC_CHANNEL;
+    datagram[1]= state;
+    datagram[2]=channelID;
+    WRITEDATAGRAM
+
 }
 
  void DACGain::slot_gainChanged(double gain){
      datagram.clear();
-     datagram.append(QString("Volume changed to %2 on Channel %1 ").arg(channelID).arg(gain));
+     datagram[0]= DAC_OUTPUTGAIN;
+     datagram[1]= (uchar) round(-2*gain);
+     datagram[2]=channelID;
      WRITEDATAGRAM
  }
 

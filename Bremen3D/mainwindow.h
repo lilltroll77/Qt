@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #define MAGIC_FILECHECKNUMBER 17335633962690440504
-#define FILEVERSION 2
+#define FILEVERSION 3
 
 #include <QMainWindow>
 #include <QAction>
@@ -76,7 +76,7 @@ QAction *exitAction;
 QAction *aboutAction;
 QAction *plotAction;
 QAction *graphAction;
-Settings_t programSettings[4];
+Settings_t programSettings[16];
 
 };
 

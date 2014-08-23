@@ -25,7 +25,7 @@ class MainTab : public QWidget
 public:
     explicit MainTab(QWidget *parent = 0 ,  Network *udp =0);
     QStatusBar *statusbar;
-    Knob *knob_bremen3D;
+    //Knob *knob_bremen3D;
 
     //Widgets width public acess
     QRadioButton *radiobuttons[4];
@@ -41,7 +41,7 @@ void slot_synctoXMOS();
 void slot_syncFromXMOS();
 void slot_pingXMOS();
 void slot_programChanged(int index);
-void slot_effectChanged(double value);
+//void slot_effectChanged(double value);
 
 private:
     int currentProgram;
@@ -64,21 +64,18 @@ private:
     QPushButton *buttonPingXMOS;
     QLineEdit *lineEditXMOSIP;
 
-    //Program Box
-    QGridLayout *programLayout;
-    QGroupBox *box_program;
-    QVBoxLayout *box_layout;
+    //Program selector box
+    QGroupBox   *program_Groupbox;
+    QVBoxLayout *program_layout;
+    QComboBox   *program_ComboBox;
 
-   // QPushButton *openbuttons[4];
+
     //Input selector box
-    QGroupBox *box_input;
-    QComboBox *input_selector;
+    QGroupBox   *input_Groupbox;
+    QVBoxLayout *input_layout;
+    QComboBox   *input_ComboBox;
 
-    //Mixer box
-    QGroupBox *box_mixer;
-
-    QVBoxLayout *mixerLayout;
-
+    //UDP
     QUdpSocket  *UDP_Socket;
     QHostAddress *IP_XMOS;
     quint16 *port_XMOS;

@@ -1,4 +1,5 @@
 #include "eqchannel.h"
+#include <QDebug>
 EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, Network *udp , Knob *knob_linkedFc) :
     QWidget(parent){
 
@@ -101,9 +102,14 @@ void EQChannel::disableGraph(){
 }
 
 void EQChannel::slot_delayChanged(double delay){
+    uint delay_fixed=(uint) round(1000*delay);
+    const char *ptr = (const char *) &delay_fixed;
     datagram.clear();
-    datagram.append(QString("EQ delay changed to %1 ch %2").arg(delay).arg(channel));
-    WRITEDATAGRAM
+    datagram[0]=DELAY_CHANGED;
+    datagram[1]=channel;
+    datagram.insert(4 , ptr , sizeof(uint));
+    //qDebug() << datagram;
+    WRITEDATAGRAM;
 }
 
 void EQChannel::recalc_graph(){

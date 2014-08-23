@@ -29,7 +29,8 @@ HEADERS += \
     centralwidget.h \
     eqchannel.h \
     eqsection.h \
-    defines.h
+    defines.h \
+    mixertab.h
 
 SOURCES += \
     adc.cpp \
@@ -48,7 +49,8 @@ SOURCES += \
     classes/transform.cpp \
     centralwidget.cpp \
     eqchannel.cpp \
-    eqsection.cpp
+    eqsection.cpp \
+    mixertab.cpp
 
 RESOURCES += \
     graphics.qrc

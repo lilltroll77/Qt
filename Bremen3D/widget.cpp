@@ -22,11 +22,13 @@ Widget::Widget(QWidget *parent , QStatusBar *statusbar)
 
     tabWidget   = new QTabWidget(this);
     main_tab    = new MainTab(this  , &udp);
+    mixer_tab   = new MixerTab(this, &udp);
     eq_tab      = new EQTab(this    , &udp);
     //adc_tab     = new ADCTab(this   ,&udp);
     dac_tab     = new DACTab(this   , &udp);
 
     tabWidget-> addTab(main_tab, tr("Main"));
+    tabWidget->addTab(mixer_tab, tr("Matrix mixer"));
     tabWidget-> addTab(eq_tab, tr("Filter && Delay"));
     //tabWidget-> addTab(adc_tab, tr("ADC"));
     tabWidget-> addTab(dac_tab, tr("DAC"));
