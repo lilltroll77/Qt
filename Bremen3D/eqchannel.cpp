@@ -21,9 +21,9 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     knob_delay  = new Knob(this, linScale);
     knob_delay -> setTitle("t [ms]");
     knob_delay -> setKnobColor("rgb(255, 200, 127)");
-    knob_delay -> setRange(0,20,100);
-    knob_delay -> setDecimals(3);
-    knob_delay -> setSingleStep(0.001);
+    knob_delay -> setRange(0,20,200);
+    knob_delay -> setDecimals(2);
+    knob_delay -> setSingleStep(0.01);
     connect(knob_delay , SIGNAL(valueChanged(double)) , this , SLOT(slot_delayChanged(double)) );
 
     layout_delay = new QHBoxLayout;

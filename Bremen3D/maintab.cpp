@@ -19,11 +19,13 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     box_volume = new QGroupBox;
     spinbox_volume = new QSpinBox;
     spinbox_volume->setRange(-100,0);
+    spinbox_volume->setValue(-50);
     spinbox_volume->setFixedWidth(60);
     spinbox_volume->setAlignment(Qt::AlignCenter);
     slider_MasterVolume = new QSlider;
     slider_MasterVolume->setToolTip(tr("Master Volume"));
     slider_MasterVolume->setRange(-100,0);
+    slider_MasterVolume->setValue(-50);
     slider_MasterVolume->setFixedHeight(200);
     slider_MasterVolume->setFixedWidth(60);
     slider_MasterVolume->setTickInterval(10);

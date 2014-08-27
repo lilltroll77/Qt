@@ -263,7 +263,7 @@ void MainWindow::slot_saveas(){
     state=central_widget->mixer_tab->radiobuttons_k[i]->isChecked();
     i++;
   }
-  out <<i ;
+  out <<(i-1) ;
   out << central_widget->mixer_tab->knob_k->Value();
 
   out << central_widget->eq_tab->knob_linkedFc->Value();

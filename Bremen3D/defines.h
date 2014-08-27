@@ -2,8 +2,8 @@
 #define DEFINES_H
 
 
-#define VERSION "0.10"
-#define COMPILEDATE "2014-08-23"
+#define VERSION "0.11"
+#define COMPILEDATE "2014-08-25"
 #define FS 44100
 #define FMIN 10
 #define SETMAXIMUMWIDTH 80
