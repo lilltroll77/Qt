@@ -34,9 +34,8 @@ void freqz(double B[3] , double A[2] , std::complex<double> H[PLOTSIZE]){
     }
 }
 
-void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , double Bcoef[3] , double Acoef[2] ){
-
-    double a0 ,a1 ,a2 ,b0,b1,b2;
+void calcFilt(EQ_section_t &EQ , double fs, double Bcoef[3] , double Acoef[2] ){
+double a0 ,a1 ,a2 ,b0,b1,b2;
 
  /*
 %Calculate parametric EQ coef
@@ -55,13 +54,13 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
     % lowShelf
     % highSelf
    */
-    double w0 = 2 * M_PI * f0/fs;
-    double alpha=sin(w0)/(2*Q);
-    double A = pow(10,GaindB/40);
-    double sqA = pow(10,GaindB/20);
+    double w0 = 2 * M_PI * EQ.Fc/fs;
+    double alpha=sin(w0)/(2 * EQ.Q);
+    double A = pow(10,EQ.Gain/40);
+    double sqA = pow(10,EQ.Gain/20);
     double p; //prewarp factor
-    switch(type){
-    case LowPass1:
+    switch(EQ.type){
+    case LP1:
             p = tan(0.5*w0);
             a0 = 1;
             a1 = (p-1)/(p+1);
@@ -70,7 +69,7 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
             b1 = b0;
             b2 = 0;
             break;
-    case LowPass :
+    case LP2 :
             b0 = sqA * (1 - cos(w0))/2;
             b1 =  2*b0;
             b2 =  b0;
@@ -78,7 +77,7 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
             a1 =  -2*cos(w0);
             a2 =   1 - alpha;
            break;
-    case HighPass1 :
+    case HP1 :
             p = tan(0.5*w0);
             a0 = 1;
             a1 = (p-1)/(p+1);
@@ -87,7 +86,7 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
             b1 = -b0;
             b2 = 0;
             break;
-    case HighPass :
+    case HP2 :
             b0 = sqA* (1 + cos(w0))/2;
             b1 =  -2*b0;
             b2 =   b0;
@@ -145,7 +144,7 @@ void calcFilt(double f0, double Q, double GaindB , double fs, FilterType type , 
             a1 =   -2*( (A-1) + (A+1)*cos(w0)                   );
             a2 =        (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha;
             break;
-      case HighSelf:
+      case HighShelf:
             b0 =    A*( (A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha );
             b1 = -2*A*( (A-1) + (A+1)*cos(w0)                   );
             b2 =    A*( (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha );

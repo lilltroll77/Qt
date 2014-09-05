@@ -10,6 +10,7 @@
 #include <QDial>
 #include <QStatusBar>
 #include <QUdpSocket>
+#include <QComboBox>
 #include "classes/knob.h"
 #include "UDPcommands.h"
 
@@ -26,7 +27,6 @@ public:
     QPushButton *invertButton;
     Knob *knob;
     QLineEdit *channelAlias;
-
 
 signals:
 
@@ -54,6 +54,8 @@ public:
     explicit DACTab(QWidget *parent = 0 , Network *udp =0);
     QStatusBar *statusbar;
     DACGain *channel[8];
+    QComboBox *IIRFilter;
+    QComboBox *FIRFilter;
 
 signals:
 
@@ -61,9 +63,13 @@ public slots:
 
 private:
 QGridLayout *layout;
+QVBoxLayout *layoutReconstruct;
 QGroupBox *groupBoxReconstruct;
 QGroupBox *groupBox;
 QGridLayout *topLayout;
+QLabel *IIRlabel;
+QLabel *FIRlabel;
+
 };
 
 #endif // DACTAB_H

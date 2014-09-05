@@ -1,4 +1,5 @@
 #include "eqchannel.h"
+#include "defines.h"
 #include <QDebug>
 EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, Network *udp , Knob *knob_linkedFc) :
     QWidget(parent){
@@ -24,6 +25,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     knob_delay -> setRange(0,20,200);
     knob_delay -> setDecimals(2);
     knob_delay -> setSingleStep(0.01);
+    knob_delay -> setValue(DEFAULT_DELAY);
     connect(knob_delay , SIGNAL(valueChanged(double)) , this , SLOT(slot_delayChanged(double)) );
 
     layout_delay = new QHBoxLayout;
@@ -102,7 +104,7 @@ void EQChannel::disableGraph(){
 }
 
 void EQChannel::slot_delayChanged(double delay){
-    uint delay_fixed=(uint) round(1000*delay);
+    float delay_fixed=(uint) round(1000*delay);
     const char *ptr = (const char *) &delay_fixed;
     datagram.clear();
     datagram[0]=DELAY_CHANGED;

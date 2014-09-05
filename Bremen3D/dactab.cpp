@@ -134,6 +134,30 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBoxReconstruct = new QGroupBox;
     groupBoxReconstruct->setTitle(tr("Reconstruction filter"));
     groupBoxReconstruct->setToolTip(tr("The settings of the reconstruction filter of the DAC"));
+
+    IIRlabel = new QLabel;
+    IIRlabel->setText("IIR filter");
+    IIRFilter = new QComboBox;
+    IIRFilter->addItem("Normal",QVariant(0));
+    IIRFilter->addItem("f = 50kHz",QVariant(1));
+    IIRFilter->addItem("f = 60kHz",QVariant(2));
+    IIRFilter->addItem("f = 70kHz",QVariant(3));
+    IIRFilter->setToolTip("IIR Bandwith of reconstruction filter");
+    IIRFilter->setMaximumWidth(100);
+
+    FIRlabel = new QLabel;
+    FIRlabel->setText("FIR filter");
+    FIRFilter = new QComboBox;
+    FIRFilter->addItem("Fast Rolloff",QVariant(0));
+    FIRFilter->addItem("Slow Rolloff",QVariant(1));
+    FIRFilter->setToolTip("FIR rolloff of reconstruction filter");
+    FIRFilter->setMaximumWidth(100);
+    layoutReconstruct = new QVBoxLayout;
+    layoutReconstruct->addWidget(IIRlabel);
+    layoutReconstruct->addWidget(IIRFilter);
+    layoutReconstruct->addWidget(FIRlabel);
+    layoutReconstruct->addWidget(FIRFilter);
+    groupBoxReconstruct->setLayout(layoutReconstruct);
     topLayout->addWidget(groupBoxReconstruct,0,0,1,1);
     setLayout(topLayout);
 }

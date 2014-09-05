@@ -50,15 +50,16 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       knob_gain->setValue(DEFAULT_GAIN);
       filterType = new QComboBox(this);
       filterType-> setToolTip(tr("Filter type"));
-      filterType->addItem(tr("LowShelf"),QVariant(LowShelf));
-      filterType->addItem(tr("HighSelf"),QVariant(HighSelf));
-      filterType->addItem(tr("PeakingEQ"),QVariant(PeakingEQ));
+      filterType->addItem(tr("1:st order LP"),QVariant(LP1));
+      filterType->addItem(tr("2:nd order LP"),QVariant(LP2));
+      filterType->addItem(tr("1:st order HP"),QVariant(HP1));
+      filterType->addItem(tr("2:nd order HP"),QVariant(HP2));
+
+      filterType->addItem(tr("Low Shelf"),QVariant(LowShelf));
+      filterType->addItem(tr("High Shelf"),QVariant(HighShelf));
+      filterType->addItem(tr("Peaking EQ"),QVariant(PeakingEQ));
       filterType->addItem(tr("Notch"),QVariant(Notch));
       filterType->addItem(tr("AllPass"),QVariant(AllPass));
-      filterType->addItem(tr("LowPass 1:st"),QVariant(LowPass1));
-      filterType->addItem(tr("LowPass 2:nd"),QVariant(LowPass));
-      filterType->addItem(tr("HighPass 1:st"),QVariant(HighPass1));
-      filterType->addItem(tr("HighPass 2:st"),QVariant(HighPass));
       filterType->addItem(tr("BandPass"),QVariant(BandPass));
       filterType->setCurrentIndex(DEFAULT_FILTER);
 
@@ -108,11 +109,12 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
 
 
   void::EQSection::updateSettingsAndPlot(bool updatePlot){
-      double fc = knob_fc->Value();
-      double Q =  knob_Q->Value();
-      double gain = knob_gain->Value();
-      FilterType type = (FilterType)  filterType->currentIndex();
-      calcFilt( fc  , Q , gain , 44100 ,type , B  ,A );
+      EQ_section_t EQ;
+      EQ.Fc = knob_fc->Value();
+      EQ.Q =  knob_Q->Value();
+      EQ.Gain = knob_gain->Value();
+      EQ.type = (FilterType)  filterType->currentIndex();
+      calcFilt( EQ, 44100 , B  ,A );
       freqz(B ,A , freq);
       if(updatePlot)
         emit eqchanged(); //Signal to parent its time to update plot
@@ -122,27 +124,27 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   //SLOTS
   void EQSection::slot_gainChanged(double gain){
       updateSettingsAndPlot(true);
-      uint mGain=(int) round(1000*gain);
-      const char *ptr = (const char *) &mGain;
+      float gain_f=(float) gain;
+      const char *ptr = (const char *) &gain_f;
 
       datagram.clear();
       //datagram.append(QString("EQ Gain changed to %1 at EQsection %2 on ch %3").arg(gain).arg(sectionID).arg(channelID));
       datagram[0]= GAIN_CHANGED;
       datagram[1]=(char) channelID;
       datagram[2]=(char) sectionID;
-      datagram.insert(4 , ptr , sizeof(int));
+      datagram.insert(4 , ptr , sizeof(float));
       WRITEDATAGRAM
   }
 
   void EQSection::slot_Q_Changed(double Q){
       updateSettingsAndPlot(true);
-      uint mQ=(uint) round(1000*Q);
-      const char *ptr = (const char *) &mQ;
+      float Q_f=(float) Q;
+      const char *ptr = (const char *) &Q_f;
       datagram.clear();
       datagram[0]=Q_CHANGED;
       datagram[1]=(char) channelID;
       datagram[2]=(char) sectionID;
-      datagram.insert(4 , ptr , sizeof(uint));
+      datagram.insert(4 , ptr , sizeof(float));
       WRITEDATAGRAM
 
   }
@@ -150,13 +152,13 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   void EQSection::slot_fcChanged(double fc){
       updateSettingsAndPlot(true);
       eqTracer->setGraphKey(fc);
-      uint mfc=(uint) round(1000*fc);
-      const char *ptr = (const char *) &mfc;
+      float fc_f = (float) fc;
+      const char *ptr = (const char *) &fc_f;
       datagram.clear();
       datagram[0]=FC_CHANGED;
       datagram[1]=(char) channelID;
       datagram[2]=(char) sectionID;
-      datagram.insert(4 , ptr , sizeof(uint));
+      datagram.insert(4 , ptr , sizeof(float));
       WRITEDATAGRAM
   }
 
@@ -165,7 +167,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
           knob_gain->setDisabled(true);
       else
           knob_gain->setDisabled(false);
-      if(type == LowPass1|| type==HighPass1)
+      if(type == LP1|| type==HP1)
           knob_Q->setDisabled(true);
       else
           knob_Q->setDisabled(false);
