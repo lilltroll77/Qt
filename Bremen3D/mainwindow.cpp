@@ -20,8 +20,10 @@ MainWindow::MainWindow(QWidget *parent) :
     menubar = new QMenuBar(this);
     fileMenu = new QMenu(tr("&File"), this);
     fileMenu->setObjectName("fileMenu");
+    networkMenu = new QMenu(tr("&Network") , this);
+    networkMenu->setObjectName("networkMenu");
     helpMenu = new QMenu(tr("&Help"), this);
-    QMenu *options = new QMenu(tr("&Options"), this);
+    options = new QMenu(tr("&Options"), this);
     //QIcon(":/images/new.png")
 
     openAction = fileMenu->addAction(tr("&Open ..."));
@@ -33,6 +35,16 @@ MainWindow::MainWindow(QWidget *parent) :
     exitAction = fileMenu->addAction(tr("E&xit"));
     connect(exitAction , SIGNAL(triggered()),this, SLOT( close()) ) ;
 
+    networkAction = networkMenu->addAction(tr("Network settings"));
+    connect(networkAction , SIGNAL(triggered()) , this , SLOT(slot_networkSettings()));
+
+    syncFromHostAction = networkMenu->addAction(tr("Sync Computer->HW"));
+    connect(syncFromHostAction , SIGNAL( triggered(bool)) , this , SLOT(slot_syncFromHost(bool)) );
+
+    syncToHostAction = networkMenu->addAction(tr("Sync HW->Computer"));
+    //syncToHostAction->setEnabled(false);
+    connect(syncToHostAction  , SIGNAL(triggered(bool)) , this , SLOT(slot_syncToHost(bool)) );
+
     aboutAction= helpMenu->addAction(tr("&About"));
     connect(aboutAction , SIGNAL(triggered()),this, SLOT(slot_about()) );
 
@@ -41,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     menubar->addMenu(fileMenu);
     menubar->addMenu(options);
+    menubar->addMenu(networkMenu);
     menubar->addMenu(helpMenu);
     setMenuBar(menubar);
 
@@ -90,72 +103,6 @@ void MainWindow::slot_graph_options(){
     msgBoxGraph.exec();
 }
 
-void MainWindow::programChanged(int new_program){
-     //programSettings[currentProgram].mixer = central_widget->main_tab->knob_bremen3D->Value(); //Store old
-    //central_widget->main_tab->knob_bremen3D->setValue( programSettings[new_program].mixer );  //Fetch new
-    for(int ch=0 ; ch< CHANNELS ; ch++){
-    //DAC Gain
-       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].DACgain = central_widget->dac_tab->channel[ch]->knob->Value(); //Store
-       central_widget->dac_tab->channel[ch]->knob->setValue( programSettings[new_program].channel[ch].DACgain  ); // Fetch
-    //DAC mute
-       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].mute = central_widget->dac_tab->channel[ch]->muteButton->isChecked();
-       central_widget->dac_tab->channel[ch]->muteButton->setChecked( programSettings[new_program].channel[ch].mute );
-    //DAC invert
-       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].invert = central_widget->dac_tab->channel[ch]->invertButton->isChecked();
-       central_widget->dac_tab->channel[ch]->invertButton->setChecked( programSettings[new_program].channel[ch].invert );
-    //DAC Alias
-       /// USE pointer instead ???
-       programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].alias = central_widget->dac_tab->channel[ch]->channelAlias->displayText();
-       central_widget->dac_tab->channel[ch]->channelAlias->setText(  programSettings[new_program].channel[ch].alias );
-
-    for(int sec=0 ; sec < SECTIONS ; sec++){
-        ///TELL XMOS ???, but DO NOT REDRAW
-        // EQsection active
-            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].active = central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->blockSignals(true);
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->setChecked( programSettings[new_program].channel[ch].eqsection[sec].active );
-            //update tracer
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->eqTracer->setVisible( programSettings[new_program].channel[ch].eqsection[sec].active );
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->blockSignals(false);
-
-        // EQsection link
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->blockSignals(true);
-            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].link = central_widget->eq_tab->channel[ch]->eqSection[sec]->link->isChecked();
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->setChecked( programSettings[new_program].channel[ch].eqsection[sec].link );
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->link->blockSignals(false);
-        // EQsection Q
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->blockSignals(true);
-            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].Q = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->Value();
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].Q   );
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->blockSignals(false);
-        // EQsection gain
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->blockSignals(true);
-            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].gain = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->Value();
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].gain   );
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->blockSignals(false);
-
-         // EQsection filtertype
-            programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].type = (FilterType) central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->blockSignals(true);
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->setCurrentIndex( (int) programSettings[ new_program ].channel[ch].eqsection[sec].type );
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->blockSignals(false);
-
-         // EQsection fc will also update eqtracer
-             programSettings[/*OLD*/ currentProgram /*PROGRAM*/].channel[ch].eqsection[sec].fc = central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->Value();
-             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->blockSignals(true);
-             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->setValue( programSettings[ new_program ].channel[ch].eqsection[sec].fc   );
-             //update eqtracer
-             central_widget->eq_tab->channel[ch]->eqSection[sec]->eqTracer->setGraphKey(  programSettings[ new_program ].channel[ch].eqsection[sec].fc );
-             central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->blockSignals(false);
-
-             central_widget->eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false); //recalc B,A,freq
-
-          }
-        central_widget->eq_tab->channel[ch]->recalc_graph(); // All sections updated including individual freq resp ->recalc graph
-    }
-    currentProgram=new_program;
-}
-
 
 void MainWindow::slot_open(){
   QString fileName;
@@ -170,10 +117,12 @@ void MainWindow::slot_open(){
   QString str;
   quint16 channels;
   quint16 sections;
-  int type;
-  bool link,active;
+  int k_choice , type , mute;
+  bool state;
+  int polarity;
   double fc, Q ,gain , delay ,p,k;
   QString displayText;
+  bool blockSignals = false;
 
   in >> magic;
   if(magic != MAGIC_FILECHECKNUMBER){
@@ -191,47 +140,32 @@ void MainWindow::slot_open(){
   }
   in >> channels;
   in >> sections;
-  //in >> effect;
-  //central_widget->main_tab->knob_bremen3D->setValue(effect);
-  in >> p;
-  central_widget->mixer_tab->knob_p->setValue(p);
-
-  in >> type;
-  if(type<=2)
-      central_widget->mixer_tab->radiobuttons_k[type]->setChecked(true);
-  in >> k;
-      central_widget->mixer_tab->knob_k->setValue(k);
-
-  in >> fc;
-  central_widget->eq_tab->knob_linkedFc->setValue(fc);
+  in >> p; central_widget->mixer_tab->setP(p , blockSignals);
+  in >> k; central_widget->mixer_tab->setK(k , blockSignals);
+  in >> k_choice; central_widget->mixer_tab->setK_type((k_choice_t) k , blockSignals);
+  in >> fc; central_widget->eq_tab->setLinkedFc(fc , blockSignals);
+  in >> gain; central_widget->eq_tab->setPreGain(gain , blockSignals);
 
   for(int ch=0 ; ch<(int) channels ; ch++){
-      in >> gain; central_widget->dac_tab->channel[ch]->knob->setValue(gain);
-      in >> active; central_widget->dac_tab->channel[ch]->muteButton->setChecked(active);
-      in >> active; central_widget->dac_tab->channel[ch]->invertButton->setChecked(active);
+      in >> gain; central_widget->dac_tab->channel[ch]->setGain(gain , blockSignals);
+      in >> polarity; central_widget->dac_tab->channel[ch]->setPolarity( (polarity_t) polarity , blockSignals);
+      in >> mute; central_widget->dac_tab->channel[ch]->setMute((mute_t) mute , blockSignals);
       in >> displayText ; central_widget->dac_tab->channel[ch]->channelAlias->setText(displayText);
-      in >> delay; central_widget->eq_tab->channel[ch]->knob_delay->setValue(delay);
+      in >> delay; central_widget->eq_tab->channel[ch]->setDelay(delay , blockSignals);
    for(int sec=0 ; sec<(int) sections ; sec++){
-        in >> active >> type >> fc >> link >> Q >> gain;
+        in >> state; central_widget->eq_tab->channel[ch]->eqSection[sec]->setFilterActive(state , blockSignals);
+        in >> type; central_widget->eq_tab->channel[ch]->eqSection[sec]->setFilterType((filterType_t) type , blockSignals );
+        in >> fc; central_widget->eq_tab->channel[ch]->eqSection[sec]->setFc(fc , blockSignals);
+        in >> state; central_widget->eq_tab->channel[ch]->eqSection[sec]->setLinked(state , blockSignals);
+        in >> Q; central_widget->eq_tab->channel[ch]->eqSection[sec]->setQ(Q , blockSignals);
+        in >> gain;  central_widget->eq_tab->channel[ch]->eqSection[sec]->setGain(gain , blockSignals);
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
 
-        central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->setChecked(active);
-        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->setValue(fc);
-        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->setValue(Q);
-        central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->setValue(gain);
-        if(type>=0 || type < ( central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->maxCount()) )
-            central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->setCurrentIndex( type );
-        else{
-            msgBoxError.setText(tr("FILE IS CORRUPT"));
-            msgBoxError.setWindowTitle(tr("FILE ERROR"));
-            msgBoxError.exec();
-            return;
-        }
-    // update freq response data in struct
+        // update freq response data in struct
     //freqz(eqsettings[ch][sec].B  ,eqsettings[ch][sec].A, 44100 ,&f , eqsettings[ch][sec].freq , ejw);
     }
   }
@@ -256,31 +190,25 @@ void MainWindow::slot_saveas(){
   out << (quint16) SECTIONS;
   //out << central_widget->main_tab->knob_bremen3D->Value();
 
-  out << central_widget->mixer_tab->knob_p->Value();
-
-  bool state=false;
-  while(state==false){
-    state=central_widget->mixer_tab->radiobuttons_k[i]->isChecked();
-    i++;
-  }
-  out <<(i-1) ;
-  out << central_widget->mixer_tab->knob_k->Value();
-
-  out << central_widget->eq_tab->knob_linkedFc->Value();
+  out << central_widget->mixer_tab->getP();
+  out << central_widget->mixer_tab->getK();
+  out << (int) central_widget->mixer_tab->getK_type();
+  out << central_widget->eq_tab->getLinkedFc();
+  out << central_widget->eq_tab->getPreGain();
 
   for(int ch=0 ; ch<CHANNELS ; ch++){
-      out << central_widget->dac_tab->channel[ch]->knob->Value();
-      out << central_widget->dac_tab->channel[ch]->muteButton->isChecked();
-      out << central_widget->dac_tab->channel[ch]->invertButton->isChecked();
+      out << central_widget->dac_tab->channel[ch]->getGain();
+      out << (int) central_widget->dac_tab->channel[ch]->getPolarity();
+      out << (int) central_widget->dac_tab->channel[ch]->getMute();
       out << central_widget->dac_tab->channel[ch]->channelAlias->displayText();
-      out << central_widget->eq_tab->channel[ch]->knob_delay->Value();
+      out << central_widget->eq_tab->channel[ch]->getDelay();
    for(int sec=0 ; sec<SECTIONS ; sec++){
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->groupBox->isChecked();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->filterType->currentIndex();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_fc->Value();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->link->isChecked();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_Q->Value();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->knob_gain->Value();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterActive();
+        out << (int) central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterType();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFc();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getLinked();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getQ();
+        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getGain();
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
        out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
@@ -291,6 +219,89 @@ void MainWindow::slot_saveas(){
 
 
   file.close();
+}
+
+void MainWindow::pause(int t){
+    tmr.setInterval(t);
+    tmr.start();
+    while( tmr.remainingTime()>0);
+    tmr.stop();
+}
+
+void MainWindow::slot_syncFromHost(bool button){
+  qDebug()<<"Sync from host="<<button;
+  QMessageBox* msgBox = new QMessageBox;
+  msgBox->setWindowTitle("Sync");
+  msgBox->setText("This action will syncronize all settings from this computer to the hardware.\nThe current settings in the hardware will be overwritten.\n");
+  msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
+  msgBox->setDefaultButton(QMessageBox::Discard);
+  int ret = msgBox->exec();
+
+  delete msgBox;
+  if(ret==1)
+      return;
+  else{
+      bool mute = central_widget->main_tab->getMuteState();
+        central_widget->main_tab->slot_sendMute(true);
+        pause(250);
+        for(int ch=0 ; ch<8 ; ch++){
+            central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
+           pause(10);
+        }
+        central_widget->eq_tab->slot_sendPreGain();
+        central_widget->dac_tab->slot_sendDACsettings();
+        central_widget->mixer_tab->sendMixerSettings();
+        central_widget->main_tab->slot_sendMute(mute);
+        central_widget->main_tab->sendSettings();
+   }
+}
+
+void MainWindow::slot_syncToHost(bool button){
+    qDebug()<<"Sync to host="<<button;
+    QMessageBox* msgBox = new QMessageBox;
+    msgBox->setWindowTitle("Sync");
+    msgBox->setText("This action will syncronize all settings from the hardware to this computer.\nThe current settings on this computer will be overwritten.\n");
+    msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
+    msgBox->setDefaultButton(QMessageBox::Discard);
+    int ret = msgBox->exec();
+
+    delete msgBox;
+    if(ret)
+        return;
+    else
+        central_widget->main_tab->slot_syncFromXMOS();
+}
+
+void MainWindow::slot_networkSettings(){
+    QMessageBox* msgBox = new QMessageBox;
+    msgBox->setFixedWidth(480);
+    msgBox->setFixedWidth(320);
+    msgBox->setWindowTitle("Network settings");
+    msgBox->setText(QString("STATIC XMOS IP: %1\nXMOS port: %2\n").arg(XMOS_IPADRESS).arg(XMOS_PORT));
+    msgBox->exec();
+    delete msgBox;
+    /*
+     * //Ethernet box
+    box_ethernet        = new QGroupBox;
+    buttonPingXMOS      = new QPushButton(tr("PING XMOS"));
+    ethernetLayout      = new QGridLayout;
+    lineEditXMOSIP      = new QLineEdit;
+    buttonPingXMOS->setToolTip(tr("Test if XMOS is available on Network"));
+    buttonPingXMOS->setFixedWidth(100);
+
+    lineEditXMOSIP->setToolTip("IP Adress of XMOS box");
+    lineEditXMOSIP->setText(QString("IP: %1").arg(XMOS_IPADRESS));
+    lineEditXMOSIP->setFixedWidth(120);
+    lineEditXMOSIP->setInputMask("IP: 000.000.000.000");
+    ethernetLayout->addWidget(buttonPingXMOS,1,0);
+    ethernetLayout->addWidget(lineEditXMOSIP,0,0);
+    box_ethernet->setToolTip(tr("Ethernet settings"));
+    box_ethernet->setTitle(tr("Ethernet"));
+    box_ethernet->setMaximumWidth(350);
+    box_ethernet->setMaximumHeight(200);
+    box_ethernet->setLayout(ethernetLayout);
+*/
+
 }
 
 MainWindow::~MainWindow()

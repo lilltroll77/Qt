@@ -6,8 +6,8 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       QWidget(parent)
   {
       plot = new_plot;
-      knob_linkedFc = knob_linkedFc_ref;
-
+      //knob_linkedFc = knob_linkedFc_ref;
+      knob_linkedFc = this->parent()->parent()->findChild<Knob*>("knob_linkedFc");
       UDP_Socket    = udp->UDP_Socket;
       IP_XMOS       = udp->IP_XMOS;
       port_XMOS     = udp->port_XMOS;
@@ -61,6 +61,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       filterType->addItem(tr("Notch"),QVariant(Notch));
       filterType->addItem(tr("AllPass"),QVariant(AllPass));
       filterType->addItem(tr("BandPass"),QVariant(BandPass));
+      filterType->addItem(tr("Mute"),QVariant(Mute));
       filterType->setCurrentIndex(DEFAULT_FILTER);
 
       layout->addWidget(filterType);
@@ -107,13 +108,89 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       groupBox->setTitle(title);
   }
 
+  bool EQSection::getLinked(){
+      return link->isChecked();
+  }
+
+  void EQSection::setLinked(bool state , bool blocked){
+      if(blocked)
+          link->blockSignals(true);
+
+      link->setChecked(state);
+      slot_linkStatusChanged(state);
+      if(blocked)
+          link->blockSignals(false);
+
+  }
+
+  double EQSection::getFc(){
+      return knob_fc->Value();
+  }
+
+  void EQSection::setFc(double Fc , bool blocked){
+      if(blocked)
+          knob_fc->blockSignals(true);
+      knob_fc->setValue(Fc);
+      if(blocked)
+          knob_fc->blockSignals(false);
+ }
+
+  double EQSection::getQ(){
+      return knob_Q->Value();
+  }
+
+  void EQSection::setQ(double Q , bool blocked){
+      if(blocked)
+          knob_Q->blockSignals(true);
+      knob_Q->setValue(Q);
+      if(blocked)
+          knob_Q->blockSignals(false);
+ }
+
+  double EQSection::getGain(){
+      return knob_gain->Value();
+  }
+
+  void EQSection::setGain(double gain , bool blocked){
+      if(blocked)
+          knob_gain->blockSignals(true);
+      knob_gain->setValue(gain);
+      if(blocked)
+          knob_gain->blockSignals(false);
+ }
+
+  bool EQSection::getFilterActive(){
+      return groupBox->isChecked();
+  }
+
+  void EQSection::setFilterActive(bool state , bool blocked){
+      if(blocked)
+          groupBox->blockSignals(true);
+      groupBox->setChecked(state);
+      eqTracer->setVisible(state);
+      updateSettingsAndPlot(true); ///can be optimized
+      if(blocked)
+          groupBox->blockSignals(false);
+      }
+
+ filterType_t EQSection::getFilterType(){
+       return (filterType_t) filterType->currentIndex();
+   }
+
+ void EQSection::setFilterType(filterType_t type ,  bool blocked){
+    if(blocked)
+        filterType->blockSignals(true);
+    filterType->setCurrentIndex((int) type);
+    if(blocked)
+        filterType->blockSignals(false);
+    }
 
   void::EQSection::updateSettingsAndPlot(bool updatePlot){
       EQ_section_t EQ;
       EQ.Fc = knob_fc->Value();
       EQ.Q =  knob_Q->Value();
       EQ.Gain = knob_gain->Value();
-      EQ.type = (FilterType)  filterType->currentIndex();
+      EQ.type = (filterType_t)  filterType->currentIndex();
       calcFilt( EQ, 44100 , B  ,A );
       freqz(B ,A , freq);
       if(updatePlot)
@@ -183,8 +260,15 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::slot_linkStatusChanged(bool state){
-    if(state)
-      knob_fc->setValue(knob_linkedFc->Value()  );
+   // qDebug()<< "Link-Fc change to"<<state;
+      if(state){
+        double fc = knob_linkedFc->Value();
+        knob_fc->setValue(fc);
+        knob_fc->setDisabled(true);
+        //eqTracer->setGraphKey(fc);
+        }
+    else
+        knob_fc->setDisabled(false);
     }
 
   void EQSection::slot_activeEQChanged(bool state){
@@ -200,3 +284,5 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
        WRITEDATAGRAM
 
   }
+
+

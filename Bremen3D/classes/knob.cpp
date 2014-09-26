@@ -149,6 +149,8 @@ void updateWidth(QDoubleSpinBox *spinbox){
 
     if ( dec > 0)
         pixels+=charWidth*dec+charWidth;  //add room for decimals
+    else
+        pixels+=charWidth;
     if ( min<0)
         pixels+=charWidth; //add rom for "-"
     spinbox->setFixedWidth(pixels);

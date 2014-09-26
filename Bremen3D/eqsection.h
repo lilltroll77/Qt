@@ -24,12 +24,20 @@ public:
     void setChannelID(int newID);
     void setBoxTitle(const QString &title);
     void updateSettingsAndPlot(bool updatePlot);
-    QGroupBox *groupBox;
-    QComboBox *filterType;
-    QCheckBox *link;
-    Knob *knob_fc;
-    Knob *knob_Q;
-    Knob *knob_gain;
+
+    bool getLinked();
+    void setLinked(bool , bool);
+    double getFc();
+    void setFc(double , bool);
+    double getQ();
+    void setQ(double , bool);
+    double getGain();
+    void setGain(double , bool);
+    filterType_t getFilterType();
+    void setFilterType(filterType_t , bool);
+    bool getFilterActive();
+    void setFilterActive(bool , bool);
+
     double B[3];
     double A[2];
     std::complex<double> freq[PLOTSIZE];
@@ -58,6 +66,12 @@ private:
  quint16 *port_XMOS;
  QByteArray datagram;
  Knob *knob_linkedFc;
+ Knob *knob_fc;
+ Knob *knob_Q;
+ Knob *knob_gain;
+ QGroupBox *groupBox;
+ QComboBox *filterType;
+ QCheckBox *link;
 };
 
 

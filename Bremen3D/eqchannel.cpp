@@ -28,6 +28,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     knob_delay -> setValue(DEFAULT_DELAY);
     connect(knob_delay , SIGNAL(valueChanged(double)) , this , SLOT(slot_delayChanged(double)) );
 
+
     layout_delay = new QHBoxLayout;
     layout_delay->addWidget(knob_delay);
     box_delay = new QGroupBox;
@@ -104,7 +105,7 @@ void EQChannel::disableGraph(){
 }
 
 void EQChannel::slot_delayChanged(double delay){
-    float delay_fixed=(uint) round(1000*delay);
+    unsigned int delay_fixed=(uint) round(1000*delay);
     const char *ptr = (const char *) &delay_fixed;
     datagram.clear();
     datagram[0]=DELAY_CHANGED;
@@ -119,8 +120,7 @@ void EQChannel::recalc_graph(){
     for(int i=0 ; i<PLOTSIZE ; i++)
         Htot[i]=1;
     for(int section=0 ; section<SECTIONS ; section++){
-        state = eqSection[section]->groupBox->isChecked();
-        if( state )
+        if( eqSection[section]->getFilterActive() )
             for(int i=0 ; i<PLOTSIZE ; i++)
                 Htot[i] *= eqSection[section]->freq[i];
     }
@@ -132,4 +132,37 @@ void EQChannel::recalc_graph(){
     //plot->graph(channel)->setData( *(f_ref()), Hdeg);
     plot->replot();
 
+}
+
+void EQChannel::setDelay(double delay , bool blocked){
+    if(blocked)
+        knob_delay->blockSignals(true);
+    knob_delay->setValue(delay);
+    if(blocked)
+        knob_delay->blockSignals(false);
+}
+
+double EQChannel::getDelay(){
+    return knob_delay->Value();
+}
+
+void EQChannel::slot_sendEQChannelSettings(){
+    EQ_channel_t* EQchannel= new EQ_channel_t;
+    const char *ptr = (const char *) EQchannel;
+    EQchannel->delay =(unsigned) round(1000*knob_delay->Value());
+    for(int sec=0; sec<SECTIONS ; sec++){
+        EQchannel->section[sec].active = eqSection[sec]->getFilterActive();
+        EQchannel->section[sec].type = eqSection[sec]->getFilterType();
+        EQchannel->section[sec].Fc = eqSection[sec]->getFc();
+        EQchannel->section[sec].Q = eqSection[sec]->getQ();
+        EQchannel->section[sec].Gain = eqSection[sec]->getGain();
+        EQchannel->section[sec].MasterGain = 0;
+    }
+    datagram.clear();
+    datagram[0]=SET_EQChannelSettings;
+    datagram[1]=channel;
+    datagram.insert(4 , ptr , sizeof(EQ_channel_t));
+    WRITEDATAGRAM;
+    delete EQchannel;
+    delete ptr;
 }

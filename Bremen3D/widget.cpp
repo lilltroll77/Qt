@@ -22,10 +22,14 @@ Widget::Widget(QWidget *parent , QStatusBar *statusbar)
 
     tabWidget   = new QTabWidget(this);
     main_tab    = new MainTab(this  , &udp);
+    main_tab->setObjectName("MainTab");
     mixer_tab   = new MixerTab(this, &udp);
+    mixer_tab->setObjectName("MixerTab");
     eq_tab      = new EQTab(this    , &udp);
+    eq_tab->setObjectName("EqTab");
     //adc_tab     = new ADCTab(this   ,&udp);
-    dac_tab     = new DACTab(this   , &udp);
+    dac_tab     = new DACTab(this , &udp);
+    dac_tab->setObjectName("DACTab");
 
     tabWidget-> addTab(main_tab, tr("Main"));
     tabWidget->addTab(mixer_tab, tr("Matrix mixer"));
@@ -46,7 +50,11 @@ Widget::~Widget()
 
 void Widget::readDatagram(){
     char i;
+    unsigned char val;
     int ch;
+    int* fs;
+    float* LinkedFc;
+    float* PreGain_f;
     qint64 size;
     port = new quint16(XMOS_PORT) ;
     IP_XMOS= new QHostAddress(XMOS_IPADRESS);
@@ -56,50 +64,73 @@ void Widget::readDatagram(){
         /** Check att IP_RX == IP_XMOS   **/
 
         switch((int) datagram_RX[0]){
-        case PROGRAM_CHANGED:
-            i=datagram_RX[1];
-            if(i<4){
-                main_tab->radiobuttons[i]->setChecked(true); ;
-            }
-            //statusbar->showMessage(tr("Program changed") ,5000);
-
+        case MASTERVOLUME_CHANGED:
+            val = (unsigned char) datagram_RX[1];
+            main_tab->setMasterVolume( ((int)val)/-2 , true);
+            //qDebug()<<val;
             break;
-        case MASTERVOLUME:
-            main_tab->slider_MasterVolume->setValue(- (int)datagram_RX[1]);
+        case AUDIOSTREAM_CHANGED:
+            qDebug()<<"Audiostream"<<(int)datagram_RX[1];
+            break;
+        case PROGRAM_CHANGED:
+            main_tab->setProgram(datagram_RX[1] , true);
+            break;
+        case DACLOCK_CHANGED:
+            val = (unsigned char) datagram_RX[1];
+            fs  = (int*) &datagram_RX[4];
+            main_tab->setLock((bool) val , *fs);
             break;
         case PING:
            break;
         case GET_DACsettings:
             DAC = (DAC_settings_t *) &datagram_RX[4];
-            bool phase[8];
-            bool state;
-            for(ch=0 ; ch< CHANNELS ; ch++)
-                phase[ch]= (DAC->Polarity >> ch)&1;
             for(ch=0 ; ch< CHANNELS ; ch++){
-                dac_tab->channel[ch]->knob->setValue( -(double)DAC->channel[ch].Gain /2 );
-                if(DAC->channel[ch].mute == True)
-                    state = true;
-                else
-                    state=false;
-                dac_tab->channel[ch]->muteButton->setChecked( state);
-                dac_tab->channel[ch]->invertButton->setChecked(phase[ch]);
+                double gain =  -(double)DAC->channel[ch].Gain /2;
+                dac_tab->channel[ch]->setGain(gain , true );
+                dac_tab->channel[ch]->setMute( DAC->channel[ch].mute ,true);
+                dac_tab->channel[ch]->setPolarity( DAC->channel[ch].polarity , true);
             }
+                main_tab->setMasterVolume(((int)DAC->MasterVolume)/-2 , true);
+                main_tab->setMuteState( DAC->MuteAll , true);
             break;
         case GET_EQsettings:
             ch=datagram_RX[4];
-            EQ= (EQ_channel_t*) &datagram_RX[8];
-            eq_tab-> channel[ch]->knob_delay->setValue( (double)EQ->delay/1000 );
+            EQ= (EQ_channel_t*) &datagram_RX[4*sizeof(int)];
+            eq_tab-> channel[ch]->setDelay((double)EQ->delay/1000 , true );
             for(int sec=0 ; sec<SECTIONS ; sec++){
-                eq_tab-> channel[ch]->eqSection[sec]->groupBox->setChecked(EQ->section[sec].active);
-                eq_tab-> channel[ch]->eqSection[sec]->filterType->setCurrentIndex(EQ->section[sec].type);
-                eq_tab-> channel[ch]->eqSection[sec]->knob_fc->setValue(EQ->section[sec].Fc);
-                eq_tab-> channel[ch]->eqSection[sec]->knob_Q->setValue(EQ->section[sec].Q);
-                eq_tab-> channel[ch]->eqSection[sec]->knob_gain->setValue(EQ->section[sec].Gain);
+                eq_tab-> channel[ch]->eqSection[sec]->setFilterActive(EQ->section[sec].active , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setFilterType(EQ->section[sec].type , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setFc(EQ->section[sec].Fc , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setQ(EQ->section[sec].Q , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setGain(EQ->section[sec].Gain , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setLinked(EQ->section[sec].link , true);
             }
+            if(ch==CHANNELS-1){
+                LinkedFc  = (float*) &datagram_RX[2*sizeof(int)];
+                PreGain_f = (float*) &datagram_RX[3*sizeof(int)];
+                //PreGain_d= (double) *PreGain_f;
+                eq_tab->setPreGain(*PreGain_f , true);
+                eq_tab->setLinkedFc( *LinkedFc , true); //Must be done in the end
+                for(ch=0 ; ch<CHANNELS ; ch++){
+                    for(int sec=0 ; sec<SECTIONS ; sec++)
+                        eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false); //update all freqz for all sections and for all channels
+                    eq_tab->channel[ch]->recalc_graph(); //update the plot for that channel
+                }
+            }
+
+
            break;
         case GET_MIXERsettings:
-            Mixer = (Mixer_settings_t*) &datagram_RX[4];
-           break;
+            const double C=2147483647;
+            int program = (double) datagram_RX[sizeof(int)];
+            main_tab->setProgram(program, true);
+            XMOSMixer = (XMOSMixer_settings_t*) &datagram_RX[2*sizeof(int)];
+            double p = (double) XMOSMixer->P /C;
+            double k = (double) XMOSMixer->K /C;
+            mixer_tab->setP(p , true);
+            mixer_tab->setK(k , true);
+            mixer_tab->setK_type(XMOSMixer->k_choice , true);
+            break;
         }
     }
 }

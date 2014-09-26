@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 #include <QGlobalStatic>
 
-#define XMOS_IPADRESS "192.168.2.99"
+#define XMOS_IPADRESS "192.168.2.19"
 #define LOCAL_IPADRESS "127.0.0.1"
 #define RX_IPADRESS "127.0.0.1"
 #define LOCAL_PORT 2222
@@ -21,30 +21,37 @@ struct Network{
 };
 
 enum UDPcommands{
-                     MUTE_ALL,
-                     MASTERVOLUME,
-                     EFFECT,
-                     INPUT_SOURCE,
-                     PROGRAM_CHANGED,
-                     SYNC_TO_XMOS,
-                     SYNC_FROM_XMOS,
-                     PING,
-                     MUTE_CHANNEL,
-                     INVERT_DAC_CHANNEL,
-                     DAC_OUTPUTGAIN,
-                     CHANNEL_CHANGED,
-                     DELAY_CHANGED,
-                     EQ_ACTIVE_CHANGED,
-                     FILTERTYPE_CHANGED,
-                     Q_CHANGED,
-                     FC_CHANGED,
-                     GAIN_CHANGED,
-                     CROSSOVER_FREQ,
-                     PNK_CHANGED,
-                     GET_DACsettings,
-                     GET_EQsettings,
-                     GET_MIXERsettings
-            };
+    MUTE_ALL,
+    MASTERVOLUME_CHANGED,
+    INPUT_SOURCE,
+    SYNC_TO_XMOS,
+    SYNC_FROM_XMOS,
+    PING,
+    MUTE_CHANNEL,
+    INVERT_DAC_CHANNEL,
+    DAC_OUTPUTGAIN,
+    DAC_RECONSTRUCTION_FILTER,
+    CHANNEL_CHANGED,
+    DELAY_CHANGED,
+    EQ_ACTIVE_CHANGED,
+    FILTERTYPE_CHANGED,
+    Q_CHANGED,
+    FC_CHANGED,
+    GAIN_CHANGED,
+    CROSSOVER_FREQ,
+    PNK_CHANGED,
+    GET_DACsettings,
+    GET_EQsettings,
+    GET_MIXERsettings,
+    SET_EQChannelSettings,
+    SET_DACsettings,
+    SET_MAINsettings,
+    PREGAIN_CHANGED,
+    PROGRAM_CHANGED,
+    DACLOCK_CHANGED,
+    GET_DACLOCK_FS,
+    AUDIOSTREAM_CHANGED
+};
 
 
 #endif // UDPCOMMANDS_H

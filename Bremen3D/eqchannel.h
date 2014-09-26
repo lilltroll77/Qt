@@ -22,8 +22,9 @@ public:
     QCheckBox *linkChannel[8];
     QLabel *label_link;
     QScrollArea *scrollArea;
-    Knob *knob_delay;
-    QGroupBox *box_delay;
+
+    void setDelay(double , bool);
+    double getDelay();
 
 
 signals:
@@ -31,9 +32,11 @@ signals:
 public slots:
 void recalc_graph();
 void slot_delayChanged(double delay);
-
+void slot_sendEQChannelSettings();
 
 private:
+
+QGroupBox *box_delay;
 QHBoxLayout * layout_eqsections;
 QHBoxLayout * layout_delay;
 std::complex<double> Htot[PLOTSIZE];
@@ -46,6 +49,9 @@ QWidget *widget;
 QByteArray datagram;
 QUdpSocket  *UDP_Socket;
 QHostAddress *IP_XMOS;
+Knob *knob_delay;
+
+
 };
 
 #endif // EQCHANNEL_H

@@ -21,7 +21,7 @@ void init_freqz(double fmin , double fmax)
     double S =log10(fmax) / log10(fmin);
     for (int i=0; i<PLOTSIZE; ++i){
         f[i] = FMIN *pow(10 ,S*(double) i / PLOTSIZE);
-        jw.imag() = 2* M_PI * f[i] / FS;
+        jw.imag(2* M_PI * f[i] / FS);
         ejw[i]=exp(jw); // Precalc e^jw and where w = 2*pi f/fs
      }
 }
@@ -151,7 +151,15 @@ double a0 ,a1 ,a2 ,b0,b1,b2;
             a0 =        (A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha;
             a1 =    2*( (A-1) - (A+1)*cos(w0)                   );
             a2 =        (A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha;
-        break;}
+        break;
+    case Mute:
+        b0=0;
+        b1=0;
+        b2=0;
+        a0=1;
+        a1=0;
+        a2=0;
+    }
     Acoef[0] = a1/a0;
     Acoef[1] = a2/a0;
     Bcoef[0] = b0/a0;

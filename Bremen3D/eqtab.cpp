@@ -9,6 +9,9 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     QWidget(parent)
 {
 
+    UDP_Socket = udp->UDP_Socket;
+    IP_XMOS = udp->IP_XMOS;
+    port_XMOS = udp->port_XMOS;
 
     channelTabs = new QTabWidget(this);
     layout = new QGridLayout(this);
@@ -25,7 +28,19 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     knob_linkedFc->setDecimals(0);
     knob_linkedFc->setSingleStep(1);
     knob_linkedFc->setValue(DEFAULT_FC);
+    knob_linkedFc->setObjectName("knob_linkedFc");
     connect(knob_linkedFc , SIGNAL(valueChanged(double)) , this , SLOT(slot_linkedFcChanged(double)) );
+
+
+    knob_PreGain = new Knob(this, linScale);
+    knob_PreGain -> setTitle("Gain [dB]");
+    knob_PreGain -> setKnobColor("rgb(127, 127, 255)");
+    knob_PreGain -> setRange(-20,0,200);
+    knob_PreGain -> setDecimals(1);
+    knob_PreGain -> setSingleStep(0.1);
+    knob_PreGain -> setValue(DEFAULT_PREGAIN);
+    connect(knob_PreGain , SIGNAL(valueChanged(double)) , this , SLOT(slot_PreGainChanged(double)) );
+
 
     //Create channel tabs
     for(int i=0 ; i<CHANNELS ;i++){
@@ -38,18 +53,30 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     channelTabs->setToolTip(tr("Channel Selector"));
     channelTabs->setTabPosition(QTabWidget::West);
-    layout->addWidget(channelTabs,0,0);
+    layout->addWidget(channelTabs,0,0,1,2);
     layout->setContentsMargins(3,3,3,3);
 
     layout_linkedFc = new QVBoxLayout;
     layout_linkedFc->addWidget(knob_linkedFc);
 
+    layout_PreGain = new QVBoxLayout;
+    layout_PreGain->addWidget(knob_PreGain);
+
     box_linkedFc = new QGroupBox;
     box_linkedFc->setLayout(layout_linkedFc);
     box_linkedFc->setTitle(tr("Linked fc"));
     box_linkedFc->setMaximumHeight(130);
-     box_linkedFc->setMaximumWidth(80);
-    layout->addWidget(box_linkedFc,1,0);
+    box_linkedFc->setMaximumWidth(80);
+    layout->addWidget(box_linkedFc,1,1);
+
+    box_PreGain = new QGroupBox;
+    box_PreGain->setLayout(layout_PreGain);
+    box_PreGain->setTitle(tr("Pre Gain"));
+    box_PreGain->setMaximumHeight(130);
+    box_PreGain->setMaximumWidth(80);
+    box_PreGain->setToolTip(tr("Sets the pre filter gain\nThis is needed when using filters with Q-values>0.5 to prevent clipping"));
+    layout->addWidget(box_PreGain,1,0);
+
 
     plotMag->xAxis->setScaleType(QCPAxis::stLogarithmic);
     plotMag->xAxis->setAutoSubTicks(false);
@@ -72,18 +99,63 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     plotMag->replot();
 
-    layout->addWidget(plotMag,0,1,2,1);
-    layout->setColumnStretch(0,1);
+    layout->addWidget(plotMag,0,3,2,3);
+    //layout->setColumnStretch(0,1);
     layout->setColumnStretch(1,1);
     setLayout(layout);
+}
+
+void EQTab::setPreGain(double pregain, bool blocked){
+    if(blocked)
+        knob_PreGain->blockSignals(true);
+    knob_PreGain->setValue(pregain);
+    if(blocked)
+        knob_PreGain->blockSignals(false);
+    }
+
+double EQTab::getPreGain(){
+    return knob_PreGain->Value();
+}
+
+void EQTab::slot_sendPreGain(){
+    float gain =(float) knob_PreGain->Value();
+    const char* ptr = (const char*) &gain;
+    datagram.clear();
+    datagram[0] = PREGAIN_CHANGED;
+    datagram.insert(4 , ptr , sizeof(float));
+    WRITEDATAGRAM
+}
+
+void EQTab::setLinkedFc(double Fc, bool blocked){
+    if(blocked)
+        knob_linkedFc->blockSignals(true);
+    knob_linkedFc->setValue(Fc);
+    slot_linkedFcChanged(Fc);
+    if(blocked)
+        knob_linkedFc->blockSignals(false);
+    }
+
+double EQTab::getLinkedFc(){
+    return knob_linkedFc->Value();
+}
+
+void EQTab::slot_PreGainChanged(double gain){
+    float gain_f = (float) gain;
+    const char* ptr = (const char*) &gain_f;
+    datagram.clear();
+    datagram[0] = PREGAIN_CHANGED;
+    datagram.insert(4 , ptr , sizeof(float));
+    WRITEDATAGRAM
 }
 
 void EQTab::slot_linkedFcChanged(double value){
     /// Fix so the update of the plot only happens once
     for(int ch=0 ; ch<CHANNELS ;ch++)
         for(int sec=0 ; sec<SECTIONS ; sec++)
-            if(channel[ch]->eqSection[sec]->link->isChecked())
-                channel[ch]->eqSection[sec]->knob_fc->setValue(value);
+            if(channel[ch]->eqSection[sec]->getLinked()){
+                channel[ch]->eqSection[sec]->setFc(value , false ); /** BLOCK OR NOT ?? **/
+
+            }
 }
 
 void EQTab::slot_updatePlot(int newChannel){
