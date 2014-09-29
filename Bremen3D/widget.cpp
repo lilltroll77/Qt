@@ -101,9 +101,10 @@ void Widget::readDatagram(){
                 eq_tab-> channel[ch]->eqSection[sec]->setFilterActive(EQ->section[sec].active , true);
                 eq_tab-> channel[ch]->eqSection[sec]->setFilterType(EQ->section[sec].type , true);
                 eq_tab-> channel[ch]->eqSection[sec]->setFc(EQ->section[sec].Fc , true);
+                eq_tab-> channel[ch]->eqSection[sec]->setLinked(EQ->section[sec].link , true);
                 eq_tab-> channel[ch]->eqSection[sec]->setQ(EQ->section[sec].Q , true);
                 eq_tab-> channel[ch]->eqSection[sec]->setGain(EQ->section[sec].Gain , true);
-                eq_tab-> channel[ch]->eqSection[sec]->setLinked(EQ->section[sec].link , true);
+
             }
             if(ch==CHANNELS-1){
                 LinkedFc  = (float*) &datagram_RX[2*sizeof(int)];

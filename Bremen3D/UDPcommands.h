@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 #include <QGlobalStatic>
 
-#define XMOS_IPADRESS "192.168.2.19"
+#define XMOS_IPADRESS "192.168.2.36"
 #define LOCAL_IPADRESS "127.0.0.1"
 #define RX_IPADRESS "127.0.0.1"
 #define LOCAL_PORT 2222

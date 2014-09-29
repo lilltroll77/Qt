@@ -69,7 +69,7 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
      QGridLayout *layout = new QGridLayout(this);
      label_link = new QLabel(tr("Link to Ch: "));
      QSignalMapper *mapper = new QSignalMapper;
-     label_link->setToolTip(tr("Link the EQ settings of this channel to other channels"));
+     label_link->setToolTip(tr("Link the EQ settings of this channel to other channels\nFeature TBD!!!"));
      layout->addWidget(scrollArea,0,0,1,10);
      layout->addWidget(label_link,1,0);
      for(int ch=0 ; ch<CHANNELS ; ch++){
@@ -77,6 +77,8 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
         layout->addWidget(linkChannel[ch],1,1+ch);
         mapper->setMapping(linkChannel[ch] , channel*CHANNELS + ch  );
         connect(linkChannel[ch] , SIGNAL(toggled(bool)) , mapper ,SLOT( map() ));
+        //Disables here
+        linkChannel[ch]->setDisabled(true);
          }
      connect(mapper , SIGNAL(mapped(int)) , parent , SLOT(slot_linkchannel(int)) );
      linkChannel[channel]->setDisabled(true);

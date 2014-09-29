@@ -53,6 +53,7 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
 
     channelTabs->setToolTip(tr("Channel Selector"));
     channelTabs->setTabPosition(QTabWidget::West);
+    //channelTabs->setVisible(false);
     layout->addWidget(channelTabs,0,0,1,2);
     layout->setContentsMargins(3,3,3,3);
 

@@ -202,19 +202,19 @@ void MainWindow::slot_saveas(){
       out << (int) central_widget->dac_tab->channel[ch]->getMute();
       out << central_widget->dac_tab->channel[ch]->channelAlias->displayText();
       out << central_widget->eq_tab->channel[ch]->getDelay();
-   for(int sec=0 ; sec<SECTIONS ; sec++){
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterActive();
-        out << (int) central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterType();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFc();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getLinked();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getQ();
-        out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getGain();
-       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
-       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
-       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
-       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
-       out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
-  }
+      for(int sec=0 ; sec<SECTIONS ; sec++){
+          out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterActive();
+          out << (int) central_widget->eq_tab->channel[ch]->eqSection[sec]->getFilterType();
+          out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getFc();
+          out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getLinked();
+          out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getQ();
+          out <<  central_widget->eq_tab->channel[ch]->eqSection[sec]->getGain();
+          out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[0];
+          out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[1];
+          out << central_widget->eq_tab->channel[ch]->eqSection[sec]->B[2];
+          out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
+          out << central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
+      }
 }
 
 

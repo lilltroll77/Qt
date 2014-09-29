@@ -198,7 +198,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     topLayout->addWidget(groupBox,1,0,1,4);
     groupBoxReconstruct = new QGroupBox;
     groupBoxReconstruct->setTitle(tr("Reconstruction filter"));
-    groupBoxReconstruct->setToolTip(tr("The settings of the reconstruction filter of the DAC"));
+    groupBoxReconstruct->setToolTip(tr("The settings of the reconstruction filter of the DAC\nFeature TBD!!"));
 
     IIRlabel = new QLabel;
     IIRlabel->setText("IIR filter for DSD");
@@ -217,7 +217,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     FIRFilter = new QComboBox;
     FIRFilter->addItem("Fast Rolloff",QVariant(0));
     FIRFilter->addItem("Slow Rolloff",QVariant(1));
-    FIRFilter->setToolTip("FIR rolloff of reconstruction filter in PCM mode");
+    FIRFilter->setToolTip("FIR rolloff of reconstruction filter in PCM mode\nFeature TBD !!!");
     FIRFilter->setMaximumWidth(100);
     FIRFilter->setEnabled(false);
     connect(FIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_FIRchanged(int) ));

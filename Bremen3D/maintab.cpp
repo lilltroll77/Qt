@@ -146,7 +146,7 @@ int MainTab::getInputSelector(){
 void MainTab::sendSettings(){
     datagram.clear();
     datagram.append(SET_MAINsettings);
-    datagram.append((char) getProgram());
+    //datagram.append((char) getProgram());
     datagram.append((char) getInputSelector());
     WRITEDATAGRAM
 }

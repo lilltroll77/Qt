@@ -113,13 +113,16 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::setLinked(bool state , bool blocked){
-      if(blocked)
+      if(blocked){
           link->blockSignals(true);
-
+          knob_fc->blockSignals(true);
+      }
       link->setChecked(state);
       slot_linkStatusChanged(state);
-      if(blocked)
+      if(blocked){
           link->blockSignals(false);
+          knob_fc->blockSignals(false);
+      }
 
   }
 
@@ -130,7 +133,8 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   void EQSection::setFc(double Fc , bool blocked){
       if(blocked)
           knob_fc->blockSignals(true);
-      knob_fc->setValue(Fc);
+      if(knob_fc->isEnabled()==true);
+        knob_fc->setValue(Fc);
       if(blocked)
           knob_fc->blockSignals(false);
  }
