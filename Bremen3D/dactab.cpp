@@ -7,6 +7,8 @@ DACGain::DACGain(QWidget *parent ,  Network *udp) :
     QWidget(parent)
 {
 
+    main_tab=this->parent()->parent()->parent()->findChild<MainTab*>("MainTab");
+
     UDP_Socket =    udp->UDP_Socket;
     IP_XMOS =       udp->IP_XMOS;
     port_XMOS =     udp->port_XMOS;
@@ -126,7 +128,8 @@ double DACGain::getGain(){
 }
 
 void DACGain::slot_muteButton_Clicked(bool state){
-     if(state)
+    main_tab->setMode(USER);
+    if(state)
        {
          muteButton->setText(tr("MUTED"));
          muteButton->setStyleSheet("color: rgb(255, 0, 0)");
@@ -150,6 +153,7 @@ void DACGain::slot_invertButton_Clicked(bool state){
            invertButton->setText(tr("Invert"));
            invertButton->setStyleSheet("color: rgb(0, 0, 0)");
     }
+    main_tab->setMode(USER);
     datagram.clear();
     datagram[0]= INVERT_DAC_CHANNEL;
     datagram[1]= state;
@@ -159,6 +163,7 @@ void DACGain::slot_invertButton_Clicked(bool state){
 }
 
  void DACGain::slot_gainChanged(double gain){
+     main_tab->setMode(USER);
      datagram.clear();
      datagram[0]= DAC_OUTPUTGAIN;
      datagram[1]= (uchar) round(-2*gain);

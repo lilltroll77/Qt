@@ -1,11 +1,12 @@
 #include "widget.h"
 #include "QDebug"
 
-Widget::Widget(QWidget *parent , QStatusBar *statusbar)
+Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
     //Setup network
 
+    statusbar= this->parent()->findChild<QStatusBar*>("statusbar");
     UDP_Socket = new QUdpSocket;
     UDP_Socket ->setObjectName("UDP Socket");
     IP_XMOS = new QHostAddress(XMOS_IPADRESS);
@@ -73,6 +74,7 @@ void Widget::readDatagram(){
             qDebug()<<"Audiostream"<<(int)datagram_RX[1];
             break;
         case PROGRAM_CHANGED:
+            qDebug()<<"Program changed";
             main_tab->setProgram(datagram_RX[1] , true);
             break;
         case DACLOCK_CHANGED:
@@ -81,8 +83,11 @@ void Widget::readDatagram(){
             main_tab->setLock((bool) val , *fs);
             break;
         case PING:
+            //qDebug()<<"PING!";
+            statusbar->showMessage(tr("Connected"),1100);
            break;
         case GET_DACsettings:
+            qDebug()<<"Recieved DAC settings";
             DAC = (DAC_settings_t *) &datagram_RX[4];
             for(ch=0 ; ch< CHANNELS ; ch++){
                 double gain =  -(double)DAC->channel[ch].Gain /2;
@@ -94,6 +99,7 @@ void Widget::readDatagram(){
                 main_tab->setMuteState( DAC->MuteAll , true);
             break;
         case GET_EQsettings:
+            qDebug()<<"Recieved EQ settings";
             ch=datagram_RX[4];
             EQ= (EQ_channel_t*) &datagram_RX[4*sizeof(int)];
             eq_tab-> channel[ch]->setDelay((double)EQ->delay/1000 , true );
@@ -122,6 +128,7 @@ void Widget::readDatagram(){
 
            break;
         case GET_MIXERsettings:
+            qDebug()<<"Recieved Mixer settings";
             const double C=2147483647;
             int program = (double) datagram_RX[sizeof(int)];
             main_tab->setProgram(program, true);

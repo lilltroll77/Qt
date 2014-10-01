@@ -3,8 +3,8 @@
 //#include "filter.h"
 
 
-#define VERSION "0.62"
-#define COMPILEDATE "2014-09-29"
+#define VERSION "0.63"
+#define COMPILEDATE "2014-10-01"
 #define FS 44100
 #define FMIN 10
 #define SETMAXIMUMWIDTH 80

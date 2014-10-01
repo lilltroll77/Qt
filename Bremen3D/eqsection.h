@@ -11,6 +11,7 @@
 #include "defines.h"
 #include "calcfilt.h"
 #include "UDPcommands.h"
+#include "maintab.h"
 //enum FilterType{LowShelf , HighSelf , PeakingEQ , Notch , AllPass , HighPass , LowPass , BandPass };
 
 
@@ -25,6 +26,7 @@ public:
     void setBoxTitle(const QString &title);
     void updateSettingsAndPlot(bool updatePlot);
 
+    void updateLinked();
     bool getLinked();
     void setLinked(bool , bool);
     double getFc();
@@ -72,6 +74,7 @@ private:
  QGroupBox *groupBox;
  QComboBox *filterType;
  QCheckBox *link;
+ MainTab* main_tab;
 };
 
 

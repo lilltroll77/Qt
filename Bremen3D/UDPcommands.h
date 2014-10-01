@@ -12,6 +12,8 @@
 #define DATAGRAM_RX_MAXLEN 1024
 #define WRITEDATAGRAM UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
 
+enum modes{PRESET,USER};
+
 struct Network{
     QUdpSocket  *UDP_Socket;
     QHostAddress *IP_XMOS;

@@ -9,6 +9,9 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     QWidget(parent)
 {
 
+    main_tab=this->parent()->parent()->findChild<MainTab*>("MainTab");
+
+
     UDP_Socket = udp->UDP_Socket;
     IP_XMOS = udp->IP_XMOS;
     port_XMOS = udp->port_XMOS;
@@ -127,11 +130,20 @@ void EQTab::slot_sendPreGain(){
     WRITEDATAGRAM
 }
 
-void EQTab::setLinkedFc(double Fc, bool blocked){
+void EQTab::updateLinkedFc(bool blocked){
+    double fc=knob_linkedFc->Value();
+    for(int ch=0 ; ch<CHANNELS ;ch++)
+        for(int sec=0 ; sec<SECTIONS ; sec++)
+            if(channel[ch]->eqSection[sec]->getLinked()){
+                channel[ch]->eqSection[sec]->setFc(fc , blocked);
+   }
+}
+
+void EQTab::setLinkedFc(double fc, bool blocked){
     if(blocked)
         knob_linkedFc->blockSignals(true);
-    knob_linkedFc->setValue(Fc);
-    slot_linkedFcChanged(Fc);
+    knob_linkedFc->setValue(fc);
+    updateLinkedFc(blocked);
     if(blocked)
         knob_linkedFc->blockSignals(false);
     }
@@ -141,6 +153,7 @@ double EQTab::getLinkedFc(){
 }
 
 void EQTab::slot_PreGainChanged(double gain){
+    main_tab->setMode(USER);
     float gain_f = (float) gain;
     const char* ptr = (const char*) &gain_f;
     datagram.clear();
@@ -149,14 +162,13 @@ void EQTab::slot_PreGainChanged(double gain){
     WRITEDATAGRAM
 }
 
-void EQTab::slot_linkedFcChanged(double value){
-    /// Fix so the update of the plot only happens once
-    for(int ch=0 ; ch<CHANNELS ;ch++)
-        for(int sec=0 ; sec<SECTIONS ; sec++)
-            if(channel[ch]->eqSection[sec]->getLinked()){
-                channel[ch]->eqSection[sec]->setFc(value , false ); /** BLOCK OR NOT ?? **/
+void EQTab::slot_linkedFcChanged(double fc){
+    main_tab->setMode(USER);
+    updateLinkedFc(false);
 
-            }
+
+    /// Fix so the update of the plot only happens once
+
 }
 
 void EQTab::slot_updatePlot(int newChannel){

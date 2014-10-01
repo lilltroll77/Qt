@@ -20,6 +20,7 @@
 //#include "widget.h"
 
 
+
 class MainTab : public QWidget
 {
     Q_OBJECT
@@ -33,10 +34,13 @@ public:
     int  getMasterVolume();
     void setLock(bool state, int fs);
     void sendSettings();
-    void setProgram(int val , bool blocked);
-    int getProgram();
+    void setProgram(int new_program , bool blocked);
+    int  getProgram();
+    void sendProgram();
     void setInputSelector(int val , bool blocked);
     int getInputSelector();
+    void setMode(int new_mode);
+    int getMode();
 
 
     QStatusBar *statusbar;
@@ -83,6 +87,8 @@ private:
     QGroupBox   *program_Groupbox;
     Knob *program_knob;
     QVBoxLayout *program_layout;
+    //QPushButton *button_preset;
+    int mode=PRESET;
 
     //UDP
     QUdpSocket  *UDP_Socket;

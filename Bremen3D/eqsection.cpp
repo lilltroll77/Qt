@@ -1,4 +1,5 @@
 #include "eqsection.h"
+
 #include "eqtab.h" // to acess static f and ejw
 #include "widget.h"
 
@@ -6,8 +7,11 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       QWidget(parent)
   {
       plot = new_plot;
-      //knob_linkedFc = knob_linkedFc_ref;
+
       knob_linkedFc = this->parent()->parent()->findChild<Knob*>("knob_linkedFc");
+
+      main_tab=this->parent()->parent()->parent()->parent()->findChild<MainTab*>("MainTab");
+
       UDP_Socket    = udp->UDP_Socket;
       IP_XMOS       = udp->IP_XMOS;
       port_XMOS     = udp->port_XMOS;
@@ -112,19 +116,28 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       return link->isChecked();
   }
 
+  void EQSection::updateLinked(){
+      bool state = link->isChecked();
+      if(state){
+        double fc = knob_linkedFc->Value();
+        knob_fc->setValue(fc);
+        knob_fc->setDisabled(true);
+      }else
+        knob_fc->setDisabled(false);
+  }
+
   void EQSection::setLinked(bool state , bool blocked){
       if(blocked){
           link->blockSignals(true);
           knob_fc->blockSignals(true);
       }
-      link->setChecked(state);
-      slot_linkStatusChanged(state);
+        link->setChecked(state);
+        updateLinked();
       if(blocked){
           link->blockSignals(false);
           knob_fc->blockSignals(false);
       }
-
-  }
+ }
 
   double EQSection::getFc(){
       return knob_fc->Value();
@@ -135,6 +148,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
           knob_fc->blockSignals(true);
       if(knob_fc->isEnabled()==true);
         knob_fc->setValue(Fc);
+      eqTracer->setGraphKey(Fc);
       if(blocked)
           knob_fc->blockSignals(false);
  }
@@ -204,6 +218,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
 
   //SLOTS
   void EQSection::slot_gainChanged(double gain){
+      main_tab->setMode(USER);
       updateSettingsAndPlot(true);
       float gain_f=(float) gain;
       const char *ptr = (const char *) &gain_f;
@@ -218,6 +233,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::slot_Q_Changed(double Q){
+      main_tab->setMode(USER);
       updateSettingsAndPlot(true);
       float Q_f=(float) Q;
       const char *ptr = (const char *) &Q_f;
@@ -231,8 +247,9 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::slot_fcChanged(double fc){
-      updateSettingsAndPlot(true);
+      main_tab->setMode(USER);
       eqTracer->setGraphKey(fc);
+      updateSettingsAndPlot(true);
       float fc_f = (float) fc;
       const char *ptr = (const char *) &fc_f;
       datagram.clear();
@@ -252,7 +269,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
           knob_Q->setDisabled(true);
       else
           knob_Q->setDisabled(false);
-
+      main_tab->setMode(USER);
       updateSettingsAndPlot(true);
       datagram.clear();
       datagram[0]=FILTERTYPE_CHANGED;
@@ -264,19 +281,14 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::slot_linkStatusChanged(bool state){
-   // qDebug()<< "Link-Fc change to"<<state;
-      if(state){
-        double fc = knob_linkedFc->Value();
-        knob_fc->setValue(fc);
-        knob_fc->setDisabled(true);
-        //eqTracer->setGraphKey(fc);
-        }
-    else
-        knob_fc->setDisabled(false);
-    }
+      main_tab->setMode(USER);
+      updateLinked();
+  }
 
   void EQSection::slot_activeEQChanged(bool state){
   //
+      main_tab->setMode(USER);
+
        eqTracer->setVisible(state);
         updateSettingsAndPlot(true); ///can be optimized
 

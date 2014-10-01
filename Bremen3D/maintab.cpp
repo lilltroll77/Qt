@@ -18,7 +18,13 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     program_Groupbox = new QGroupBox(this);
     program_knob = new Knob(this , linScale);
     program_layout = new QVBoxLayout(this);
-    program_Groupbox->setTitle("EQ & Mixer presets");
+    //button_preset = new QPushButton(tr("PRESET"));
+    //button_preset->setMaximumWidth(60);
+    //button_preset->setCheckable(false);
+    program_Groupbox->setTitle("Current Mode: Preset");
+    program_Groupbox->setObjectName("program_selector");
+
+    //program_Groupbox->setUserData(0, userData );
     program_Groupbox->setFixedWidth(200);
     program_Groupbox->setFixedHeight(200);
     program_Groupbox->setToolTip(tr("16 different presets with EQ & Mixer settings\n(The settings is stored in flash in HW)"));
@@ -28,6 +34,7 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     program_knob->setMinimumWidth(50);
     program_knob->setTitle("Program");
     program_layout->addWidget(program_knob);
+    //program_layout->addWidget(button_preset);
     program_Groupbox->setLayout(program_layout);
 
 
@@ -85,6 +92,7 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     input_ComboBox = new QComboBox;
     input_layout = new QVBoxLayout;
 
+
     input_Groupbox->setToolTip(tr("Input"));
     input_Groupbox->setTitle(tr("Input"));
     input_Groupbox->setFixedWidth(150);
@@ -98,7 +106,6 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     //input_selector->addItem(tr("ANALOG"),QVariant(2));
     input_layout->addWidget(input_ComboBox);
     input_Groupbox->setLayout(input_layout);
-
 
 
     // Top layout
@@ -119,10 +126,14 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
 
 
 
-void MainTab::setProgram(int val , bool blocked){
+void MainTab::setProgram(int new_program , bool blocked){
     if(blocked)
         program_knob->blockSignals(true);
-    program_knob->setValue((double) val);
+    if(new_program==0)
+        setMode(USER);
+    else
+        program_knob->setValue((double)new_program);
+
     if(blocked)
         program_knob->blockSignals(false);
 }
@@ -256,9 +267,16 @@ void MainTab::slot_inputselectorChanged(int index){
     WRITEDATAGRAM
 }
 
+void MainTab::sendProgram(){
+    datagram[0]=(PROGRAM_CHANGED);
+    datagram[1]=(char) getProgram();
+    WRITEDATAGRAM
+}
+
 void MainTab::slot_programChanged(double program){
-    QTimer tmr;
+    //QTimer tmr;
     //tmr.setInterval(50);
+    setMode(PRESET);
     datagram.clear();
     datagram[0]=(PROGRAM_CHANGED);
     datagram[1]=((char) round(program));
@@ -268,3 +286,14 @@ void MainTab::slot_programChanged(double program){
    // tmr.stop();
     }
 
+void MainTab::setMode(int new_mode){
+    mode=new_mode;
+    if(mode==USER)
+        program_Groupbox->setTitle("Current Mode: User defined");
+    else
+        program_Groupbox->setTitle("Current Mode: Preset");
+}
+
+int MainTab::getMode(){
+    return mode;
+}

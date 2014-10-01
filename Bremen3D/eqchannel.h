@@ -50,6 +50,7 @@ QByteArray datagram;
 QUdpSocket  *UDP_Socket;
 QHostAddress *IP_XMOS;
 Knob *knob_delay;
+MainTab* main_tab;
 
 
 };

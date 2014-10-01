@@ -7,6 +7,9 @@ EQChannel::EQChannel(QWidget *parent , int new_channel, QCustomPlot *plot_ref, N
     plot=plot_ref;
     channel=new_channel;
 
+    main_tab=this->parent()->parent()->parent()->findChild<MainTab*>("MainTab");
+
+
     UDP_Socket = udp->UDP_Socket;
     IP_XMOS = udp->IP_XMOS;
 
@@ -107,6 +110,7 @@ void EQChannel::disableGraph(){
 }
 
 void EQChannel::slot_delayChanged(double delay){
+    main_tab->setMode(USER);
     unsigned int delay_fixed=(uint) round(1000*delay);
     const char *ptr = (const char *) &delay_fixed;
     datagram.clear();

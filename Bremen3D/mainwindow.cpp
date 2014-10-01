@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*** CENTRAL WIDGET ***/
 
-    central_widget=new Widget(this , statusbar);
+    central_widget=new Widget(this);
     setCentralWidget(central_widget);
     central_widget->setObjectName("central_widget");
    // connect(central_widget-> , SIGNAL() , this ,SLOT() );
@@ -122,7 +122,7 @@ void MainWindow::slot_open(){
   int polarity;
   double fc, Q ,gain , delay ,p,k;
   QString displayText;
-  bool blockSignals = false;
+  bool blockSignals = true;
 
   in >> magic;
   if(magic != MAGIC_FILECHECKNUMBER){
@@ -165,12 +165,15 @@ void MainWindow::slot_open(){
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[0];
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
 
-        // update freq response data in struct
-    //freqz(eqsettings[ch][sec].B  ,eqsettings[ch][sec].A, 44100 ,&f , eqsettings[ch][sec].freq , ejw);
+         //update freq response data in struct but do not redraw
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false);
     }
+   central_widget->eq_tab->channel[ch]->recalc_graph();
   }
-    file.close();
-    central_widget->eq_tab->plotMag->update();
+  central_widget->main_tab->setMode(USER);
+  syncFromHost();
+  file.close();
+
 }
 
 
@@ -228,32 +231,36 @@ void MainWindow::pause(int t){
     tmr.stop();
 }
 
+void MainWindow::syncFromHost(){
+    int mode=central_widget->main_tab->getMode();
+    if(mode==PRESET)
+        central_widget->main_tab->sendProgram();
+    else{
+    bool mute = central_widget->main_tab->getMuteState();
+    central_widget->main_tab->slot_sendMute(true);
+    pause(250);
+    for(int ch=0 ; ch<8 ; ch++){
+        central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
+       pause(10);
+    }
+    central_widget->eq_tab->slot_sendPreGain();
+    central_widget->dac_tab->slot_sendDACsettings();
+    central_widget->mixer_tab->sendMixerSettings();
+    central_widget->main_tab->slot_sendMute(mute);
+    central_widget->main_tab->sendSettings();
+    }
+}
+
 void MainWindow::slot_syncFromHost(bool button){
-  qDebug()<<"Sync from host="<<button;
+  //qDebug()<<"Sync from host="<<button;
   QMessageBox* msgBox = new QMessageBox;
   msgBox->setWindowTitle("Sync");
   msgBox->setText("This action will syncronize all settings from this computer to the hardware.\nThe current settings in the hardware will be overwritten.\n");
   msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
   msgBox->setDefaultButton(QMessageBox::Discard);
-  int ret = msgBox->exec();
-
+  if(msgBox->exec() == QMessageBox::Ok)
+    syncFromHost();
   delete msgBox;
-  if(ret==1)
-      return;
-  else{
-      bool mute = central_widget->main_tab->getMuteState();
-        central_widget->main_tab->slot_sendMute(true);
-        pause(250);
-        for(int ch=0 ; ch<8 ; ch++){
-            central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
-           pause(10);
-        }
-        central_widget->eq_tab->slot_sendPreGain();
-        central_widget->dac_tab->slot_sendDACsettings();
-        central_widget->mixer_tab->sendMixerSettings();
-        central_widget->main_tab->slot_sendMute(mute);
-        central_widget->main_tab->sendSettings();
-   }
 }
 
 void MainWindow::slot_syncToHost(bool button){
@@ -263,14 +270,10 @@ void MainWindow::slot_syncToHost(bool button){
     msgBox->setText("This action will syncronize all settings from the hardware to this computer.\nThe current settings on this computer will be overwritten.\n");
     msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
     msgBox->setDefaultButton(QMessageBox::Discard);
-    int ret = msgBox->exec();
-
-    delete msgBox;
-    if(ret)
-        return;
-    else
+    if(msgBox->exec() == QMessageBox::Ok)
         central_widget->main_tab->slot_syncFromXMOS();
-}
+    delete msgBox;
+  }
 
 void MainWindow::slot_networkSettings(){
     QMessageBox* msgBox = new QMessageBox;

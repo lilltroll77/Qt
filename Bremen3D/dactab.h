@@ -79,6 +79,7 @@ QByteArray datagram;
 QPushButton *muteButton;
 QPushButton *invertButton;
 Knob *knob;
+MainTab* main_tab;
 
 };
 

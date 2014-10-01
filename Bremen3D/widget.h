@@ -24,7 +24,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = 0, QStatusBar *statusbar =0);
+    Widget(QWidget *parent = 0);
     int getCurrentTabIndex();
     MixerTab *mixer_tab;
     MainTab *main_tab;
@@ -56,7 +56,7 @@ char datagram_RX[DATAGRAM_RX_MAXLEN];
     DAC_settings_t *DAC;
     EQ_channel_t *EQ;
     XMOSMixer_settings_t *XMOSMixer;
-
+    QStatusBar *statusbar;
 
 };
 

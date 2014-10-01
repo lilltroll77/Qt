@@ -26,7 +26,8 @@ public:
 public slots:
 void slot_linkchannel(int channel);
 void slot_updatePlot(int newChannel);
-void slot_linkedFcChanged(double value);
+void updateLinkedFc(bool blocked);
+void slot_linkedFcChanged(double fc);
 void slot_PreGainChanged(double gain);
 void slot_sendPreGain();
 
@@ -48,6 +49,7 @@ private:
     QUdpSocket  *UDP_Socket;
     QHostAddress *IP_XMOS;
     quint16 *port_XMOS;
+    MainTab* main_tab;
 };
 
   // *****************************************************
