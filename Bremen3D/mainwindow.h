@@ -14,7 +14,8 @@
 #include "UDPcommands.h"
 #include <QTimer>
 #include <QDebug>
-
+#include <QProgressDialog>
+#include "windows.h"
 
 struct EQSection_t{
     bool active=false;
@@ -48,6 +49,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     bool getMuteState();
     void syncFromHost();
+    void waitForPING();
     QStatusBar *statusbar;
     ~MainWindow();
 

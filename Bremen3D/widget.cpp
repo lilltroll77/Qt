@@ -71,10 +71,13 @@ void Widget::readDatagram(){
             //qDebug()<<val;
             break;
         case AUDIOSTREAM_CHANGED:
-            qDebug()<<"Audiostream"<<(int)datagram_RX[1];
+            //qDebug()<<"Audiostream"<<(int)datagram_RX[1];
+            break;
+        case INPUT_SOURCE:
+            main_tab->setInputSelector(datagram_RX[1] ,true);
             break;
         case PROGRAM_CHANGED:
-            qDebug()<<"Program changed";
+            //qDebug()<<"Program changed";
             main_tab->setProgram(datagram_RX[1] , true);
             break;
         case DACLOCK_CHANGED:
@@ -83,11 +86,11 @@ void Widget::readDatagram(){
             main_tab->setLock((bool) val , *fs);
             break;
         case PING:
-            //qDebug()<<"PING!";
-            statusbar->showMessage(tr("Connected"),1100);
+             statusbar->showMessage(tr("Connected"),1100);
+
            break;
         case GET_DACsettings:
-            qDebug()<<"Recieved DAC settings";
+            //qDebug()<<"Recieved DAC settings";
             DAC = (DAC_settings_t *) &datagram_RX[4];
             for(ch=0 ; ch< CHANNELS ; ch++){
                 double gain =  -(double)DAC->channel[ch].Gain /2;
@@ -99,7 +102,7 @@ void Widget::readDatagram(){
                 main_tab->setMuteState( DAC->MuteAll , true);
             break;
         case GET_EQsettings:
-            qDebug()<<"Recieved EQ settings";
+            //qDebug()<<"Recieved EQ settings";
             ch=datagram_RX[4];
             EQ= (EQ_channel_t*) &datagram_RX[4*sizeof(int)];
             eq_tab-> channel[ch]->setDelay((double)EQ->delay/1000 , true );
@@ -128,7 +131,7 @@ void Widget::readDatagram(){
 
            break;
         case GET_MIXERsettings:
-            qDebug()<<"Recieved Mixer settings";
+            //qDebug()<<"Recieved Mixer settings";
             const double C=2147483647;
             int program = (double) datagram_RX[sizeof(int)];
             main_tab->setProgram(program, true);
@@ -139,6 +142,9 @@ void Widget::readDatagram(){
             mixer_tab->setK(k , true);
             mixer_tab->setK_type(XMOSMixer->k_choice , true);
             break;
+        /*default:
+            qDebug()<<"Unknown UDP command";
+            break;*/
         }
     }
 }

@@ -19,6 +19,7 @@ DACGain::DACGain(QWidget *parent ,  Network *udp) :
 
     channelAlias = new QLineEdit;
     channelAlias->setToolTip(tr("Channel Alias name"));
+    channelAlias->setMaxLength(12);
 
     knob = new Knob;
     knob->setRange(-40,0,80);
@@ -255,7 +256,7 @@ void DACTab::slot_sendDACsettings(){
     const char *ptr = (const char *) DAC;
 
     for(int ch=0; ch<CHANNELS ; ch++){
-        DAC->channel[ch].Gain = channel[ch]->getGain();
+        DAC->channel[ch].Gain = (unsigned char) round(-2*channel[ch]->getGain());
         DAC->channel[ch].mute = channel[ch]->getMute();
         DAC->channel[ch].polarity = channel[ch]->getPolarity();
         DAC->channel[ch].MasterTrim=-1;
@@ -271,8 +272,6 @@ void DACTab::slot_sendDACsettings(){
     datagram.clear();
     datagram[0]=SET_DACsettings;
     datagram.insert(4 , ptr , sizeof(DAC_settings_t));
-    UDP_Socket->writeDatagram(datagram.data(), datagram.size(), *IP_XMOS,  XMOS_PORT);
-    datagram_count++;
-    //qDebug()<<"Count="<<datagram_count;
-    //WRITEDATAGRAM
+    WRITEDATAGRAM
+
 }

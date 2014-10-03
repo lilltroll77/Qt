@@ -30,6 +30,7 @@ public:
     void setMuteState(bool , bool blocked);
     bool getMuteState();
 
+    void getLock_fs();
     void setMasterVolume(int val, bool blocked);
     int  getMasterVolume();
     void setLock(bool state, int fs);
@@ -55,12 +56,12 @@ void slot_volumesliderChanged(int value);
 void slot_volumeSpinboxChanged(int value);
 void slot_mutebuttonToggled(bool state);
 void slot_inputselectorChanged(int index);
-void slot_pingXMOS();
 void slot_programChanged(double);
 
 public slots:
 void slot_syncFromXMOS();
 void slot_sendMute(bool);
+void slot_pingXMOS();
 
 private:
 

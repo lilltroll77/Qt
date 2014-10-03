@@ -29,7 +29,7 @@ typedef struct{
       int MasterTrim;
       //int FIRStage1[64];
       //int FIRStage2[16];
-      char Gain;
+      unsigned char Gain;
   }DACChannel_t;
 
 typedef struct{

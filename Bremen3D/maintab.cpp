@@ -157,7 +157,6 @@ int MainTab::getInputSelector(){
 void MainTab::sendSettings(){
     datagram.clear();
     datagram.append(SET_MAINsettings);
-    //datagram.append((char) getProgram());
     datagram.append((char) getInputSelector());
     WRITEDATAGRAM
 }
@@ -203,6 +202,11 @@ bool MainTab::getMuteState(){
     return buttonMute->isChecked();
 }
 
+void MainTab::getLock_fs(){
+     datagram.clear();
+     datagram[0]=GET_DACLOCK_FS;
+     WRITEDATAGRAM
+}
 
 void MainTab::slot_sendMute(bool state){
     datagram.clear();

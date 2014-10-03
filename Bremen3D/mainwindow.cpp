@@ -1,9 +1,21 @@
 #include "mainwindow.h"
+#include <QTime>
+
+void delay( int millisecondsToWait )
+{
+    QTime dieTime = QTime::currentTime().addMSecs( millisecondsToWait );
+    while( QTime::currentTime() < dieTime )
+    {
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-        msgBoxAbout = new QMessageBox;
+    QProgressDialog progress("Waiting for XMOS to reply" , "Cancel" ,0,2 , this);
+
+    msgBoxAbout = new QMessageBox;
     msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(COMPILEDATE) );
     msgBoxAbout->setFixedWidth(640);
     msgBoxAbout->setFixedHeight(480);
@@ -142,7 +154,7 @@ void MainWindow::slot_open(){
   in >> sections;
   in >> p; central_widget->mixer_tab->setP(p , blockSignals);
   in >> k; central_widget->mixer_tab->setK(k , blockSignals);
-  in >> k_choice; central_widget->mixer_tab->setK_type((k_choice_t) k , blockSignals);
+  in >> k_choice; central_widget->mixer_tab->setK_type((k_choice_t) k_choice , blockSignals);
   in >> fc; central_widget->eq_tab->setLinkedFc(fc , blockSignals);
   in >> gain; central_widget->eq_tab->setPreGain(gain , blockSignals);
 
@@ -224,30 +236,48 @@ void MainWindow::slot_saveas(){
   file.close();
 }
 
-void MainWindow::pause(int t){
-    tmr.setInterval(t);
-    tmr.start();
-    while( tmr.remainingTime()>0);
-    tmr.stop();
+void MainWindow::waitForPING(){
+
+    progress.setWindowModality(Qt::WindowModal);
+    //Wait for XMOS to reply
+    progress.setMinimumDuration(0);
+    progress.setValue(0);
+    progress.repaint();
+    progress.show();
+    statusbar->showMessage("Waiting for XMOS to reply");
+    central_widget->main_tab->slot_pingXMOS();
+    QString str;
+      while(1){
+        str = statusBar()->currentMessage();
+        if(str.startsWith("Connected") || progress.wasCanceled())
+            break;
+        central_widget->main_tab->slot_pingXMOS();
+        delay(500);
+        //qDebug()<<"PING";
+     }
+      progress.setValue(1);
 }
+
 
 void MainWindow::syncFromHost(){
     int mode=central_widget->main_tab->getMode();
-    if(mode==PRESET)
+    if(mode==PRESET){
         central_widget->main_tab->sendProgram();
-    else{
+        central_widget->main_tab->getLock_fs();
+    }else{
     bool mute = central_widget->main_tab->getMuteState();
     central_widget->main_tab->slot_sendMute(true);
-    pause(250);
+    delay(250);
     for(int ch=0 ; ch<8 ; ch++){
         central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
-       pause(10);
+       delay(10);
     }
     central_widget->eq_tab->slot_sendPreGain();
     central_widget->dac_tab->slot_sendDACsettings();
     central_widget->mixer_tab->sendMixerSettings();
     central_widget->main_tab->slot_sendMute(mute);
     central_widget->main_tab->sendSettings();
+    central_widget->main_tab->getLock_fs();
     }
 }
 
@@ -258,8 +288,10 @@ void MainWindow::slot_syncFromHost(bool button){
   msgBox->setText("This action will syncronize all settings from this computer to the hardware.\nThe current settings in the hardware will be overwritten.\n");
   msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
   msgBox->setDefaultButton(QMessageBox::Discard);
-  if(msgBox->exec() == QMessageBox::Ok)
+  if(msgBox->exec() == QMessageBox::Ok){
+    waitForPING();
     syncFromHost();
+  }
   delete msgBox;
 }
 
@@ -271,7 +303,11 @@ void MainWindow::slot_syncToHost(bool button){
     msgBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Discard);
     msgBox->setDefaultButton(QMessageBox::Discard);
     if(msgBox->exec() == QMessageBox::Ok)
+    {
+        waitForPING();
         central_widget->main_tab->slot_syncFromXMOS();
+    }
+
     delete msgBox;
   }
 
