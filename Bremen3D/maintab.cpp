@@ -88,10 +88,16 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
 
 //******************************************************************************
 //Input selector box
-    input_Groupbox = new QGroupBox;
-    input_ComboBox = new QComboBox;
-    input_layout = new QVBoxLayout;
-
+    input_Groupbox = new QGroupBox(this);
+    input_ComboBox = new QComboBox(this);
+    input_layout = new QVBoxLayout(this);
+    input_format = new QLabel(tr("Format") , this);
+    input_copy = new QLabel(tr("Copyright") , this);
+    input_orig = new QLabel(tr("Original") , this);
+    input_emph= new QLabel(tr("Pre-emphasis") , this);
+    input_pro = new QLabel(tr("Pro") , this);
+    input_PLL = new QLabel(tr("PLL"), this);
+    input_validity = new QLabel(tr("Validity") , this);
 
     input_Groupbox->setToolTip(tr("Input"));
     input_Groupbox->setTitle(tr("Input"));
@@ -105,7 +111,16 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
     input_ComboBox->setMaximumWidth(75);
     //input_selector->addItem(tr("ANALOG"),QVariant(2));
     input_layout->addWidget(input_ComboBox);
+    input_layout->addWidget(input_format);
+    input_layout->addWidget(input_copy);
+    input_layout->addWidget(input_orig);
+    input_layout->addWidget(input_emph);
+    input_layout->addWidget(input_pro);
+    input_layout->addWidget(input_validity);
+    input_layout->addWidget(input_PLL);
+
     input_Groupbox->setLayout(input_layout);
+
 
 
     // Top layout
@@ -124,7 +139,92 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
 
 }
 
+void MainTab::setValidity(int v){
+    if(v==0){
+        input_validity->setText("Valid data");
+        input_validity->setToolTip(tr("Data is valid and is normally linear coded PCM audio"));
+    }else{
+        input_validity->setText("Invalid data");
+        input_validity->setToolTip(tr("Data is invalid, or may be valid compressed audio"));
+    }
+}
 
+void MainTab::setPLL(int pll){
+    if(pll==0){
+        input_PLL->setText("PLL locked");
+        input_PLL->setToolTip(tr("PLL locked"));
+    }else{
+        input_PLL->setText("PLL unlocked");
+        input_PLL->setToolTip(tr("PLL out of lock."));
+    }
+}
+
+void MainTab::setPro(int pro){
+    if(pro == 0){
+        input_pro->setText("Consumer format");
+        input_pro->setToolTip(tr("Received channel status block is in the consumer format"));
+    }else{
+        input_pro->setText("Professional format.");
+        input_pro->setToolTip(tr("Received channel status block is in the professional format"));
+    }
+}
+
+void MainTab::setCopy(int copy){
+    if(copy == 1){
+        input_copy->setText("Copyright: No");
+        input_copy->setToolTip(tr("Copyright not asserted"));
+    }else{
+        input_copy->setText("Copyright: Yes");
+        input_copy->setToolTip(tr("Copyright asserted"));
+    }
+}
+
+void MainTab::setOriginal(int original){
+    if(original == 0){
+        input_orig->setText("Not original data");
+        input_orig->setToolTip(tr("Received data is 1st generation or higher"));
+    }else{
+        input_orig->setText("Original data");
+        input_orig->setToolTip(tr("Received data is original"));
+    }
+}
+
+void MainTab::setEmphasis(int emph){
+    if(emph == 1){
+        input_emph->setText("Pre-emphasis: No");
+        input_emph->setToolTip(tr("pre-emphasis not indicated"));
+    }else{
+        input_emph->setText("Pre-emphasis: Yes");
+        input_emph->setToolTip(tr("50 μs/15 μs pre-emphasis indicated"));
+    }
+}
+
+
+
+void MainTab::setFormat(enum format_t format){
+    switch(format){
+    case PCM:
+         input_format->setText("Format: PCM");
+         input_format->setToolTip(tr("Uncompressed PCM data"));
+        break;
+    case IEC61937:
+        input_format->setText("Format: IEC61937");
+        input_format->setToolTip(tr("IEC61937 data"));
+        break;
+    case DTS_LD:
+        input_format->setText("Format: DTS LD");
+        input_format->setToolTip(tr("DTS LD"));
+        break;
+    case DTS_CD:
+        input_format->setText("Format: DTS CD");
+        input_format->setToolTip(tr("DTS CD"));
+        break;
+    case DGTL_SIL:
+        input_format->setText("Digital silent");
+        input_format->setToolTip(tr("Digital Silence was detected"));
+        break;
+    }
+}
 
 void MainTab::setProgram(int new_program , bool blocked){
     if(blocked)

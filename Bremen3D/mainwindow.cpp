@@ -13,7 +13,11 @@ void delay( int millisecondsToWait )
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    QProgressDialog progress("Waiting for XMOS to reply" , "Cancel" ,0,2 , this);
+    progress = new QProgressDialog("Waiting for XMOS to reply" , "Cancel" ,0,2 , this);
+    progress->setWindowModality(Qt::WindowModal);
+    //Wait for XMOS to reply
+    progress->setMinimumDuration(0);
+
 
     msgBoxAbout = new QMessageBox;
     msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(COMPILEDATE) );
@@ -237,25 +241,21 @@ void MainWindow::slot_saveas(){
 }
 
 void MainWindow::waitForPING(){
-
-    progress.setWindowModality(Qt::WindowModal);
-    //Wait for XMOS to reply
-    progress.setMinimumDuration(0);
-    progress.setValue(0);
-    progress.repaint();
-    progress.show();
+    progress->setValue(0);
+    progress->repaint();
+    progress->show();
     statusbar->showMessage("Waiting for XMOS to reply");
     central_widget->main_tab->slot_pingXMOS();
     QString str;
       while(1){
         str = statusBar()->currentMessage();
-        if(str.startsWith("Connected") || progress.wasCanceled())
+        if(str.startsWith("Connected") || progress->wasCanceled())
             break;
         central_widget->main_tab->slot_pingXMOS();
         delay(500);
         //qDebug()<<"PING";
      }
-      progress.setValue(1);
+      progress->close();
 }
 
 
@@ -317,10 +317,10 @@ void MainWindow::slot_networkSettings(){
     msgBox->setFixedWidth(320);
     msgBox->setWindowTitle("Network settings");
     msgBox->setText(QString("STATIC XMOS IP: %1\nXMOS port: %2\n").arg(XMOS_IPADRESS).arg(XMOS_PORT));
+    //msgBox->
     msgBox->exec();
     delete msgBox;
-    /*
-     * //Ethernet box
+/*
     box_ethernet        = new QGroupBox;
     buttonPingXMOS      = new QPushButton(tr("PING XMOS"));
     ethernetLayout      = new QGridLayout;
@@ -338,8 +338,8 @@ void MainWindow::slot_networkSettings(){
     box_ethernet->setTitle(tr("Ethernet"));
     box_ethernet->setMaximumWidth(350);
     box_ethernet->setMaximumHeight(200);
-    box_ethernet->setLayout(ethernetLayout);
-*/
+    box_ethernet->setLayout(ethernetLayout);*/
+
 
 }
 

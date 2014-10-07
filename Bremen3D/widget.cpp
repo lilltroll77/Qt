@@ -56,6 +56,9 @@ void Widget::readDatagram(){
     int* fs;
     float* LinkedFc;
     float* PreGain_f;
+    int Format_status;
+    int Channel_status;
+    int Error_status;
     qint64 size;
     port = new quint16(XMOS_PORT) ;
     IP_XMOS= new QHostAddress(XMOS_IPADRESS);
@@ -70,8 +73,29 @@ void Widget::readDatagram(){
             main_tab->setMasterVolume( ((int)val)/-2 , true);
             //qDebug()<<val;
             break;
-        case AUDIOSTREAM_CHANGED:
-            //qDebug()<<"Audiostream"<<(int)datagram_RX[1];
+        case SPDIF_CHANGED:
+
+            Channel_status = int(datagram_RX[1]);
+            Format_status = int(datagram_RX[2]);
+            Error_status = int(datagram_RX[3]);
+            //qDebug() << "SPDIF: " << Format_status << "," <<Channel_status << "," << Error_status;
+            if(Format_status>>6)
+                main_tab->setFormat(PCM);
+            else if(Format_status>>5)
+                main_tab->setFormat(IEC61937);
+            else if(Format_status>>4)
+                main_tab->setFormat(DTS_LD);
+            else if(Format_status>>3)
+                main_tab->setFormat(DTS_CD);
+
+            main_tab->setPro(       Channel_status>>3 &1);
+            main_tab->setCopy(      Channel_status>>2 &1);
+            main_tab->setOriginal(  Channel_status>>1 &1);
+            main_tab->setEmphasis(  Channel_status    &1);
+
+            main_tab->setPLL(       Error_status>>4 &1);
+            main_tab->setValidity(  Error_status>>3 &1);
+
             break;
         case INPUT_SOURCE:
             main_tab->setInputSelector(datagram_RX[1] ,true);

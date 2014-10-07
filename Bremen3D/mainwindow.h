@@ -91,7 +91,7 @@ QAction *plotAction;
 QAction *graphAction;
 Settings_t programSettings[16];
 QTimer tmr;
-
+QProgressDialog* progress;
 };
 
 

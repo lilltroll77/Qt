@@ -19,6 +19,7 @@
 #include <QTimer>
 //#include "widget.h"
 
+enum format_t{PCM , IEC61937 , DTS_LD , DTS_CD , DGTL_SIL};
 
 
 class MainTab : public QWidget
@@ -42,6 +43,13 @@ public:
     int getInputSelector();
     void setMode(int new_mode);
     int getMode();
+    void setFormat(enum format_t format);
+    void setCopy(int copy);
+    void setOriginal(int original);
+    void setEmphasis(int emph);
+    void setPro(int pro);
+    void setPLL(int pll);
+    void setValidity(int v);
 
 
     QStatusBar *statusbar;
@@ -83,6 +91,14 @@ private:
     QGroupBox   *input_Groupbox;
     QVBoxLayout *input_layout;
     QComboBox   *input_ComboBox;
+    QLabel *input_pro;
+    QLabel *input_copy;
+    QLabel *input_orig;
+    QLabel *input_emph;
+    QLabel *input_format;
+    QLabel *input_PLL;
+    QLabel *input_validity;
+
 
     //Program selector
     QGroupBox   *program_Groupbox;
