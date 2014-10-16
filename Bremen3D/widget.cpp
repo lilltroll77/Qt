@@ -98,6 +98,7 @@ void Widget::readDatagram(){
 
             break;
         case INPUT_SOURCE:
+            //qDebug()<<datagram_RX[1];
             main_tab->setInputSelector(datagram_RX[1] ,true);
             break;
         case PROGRAM_CHANGED:

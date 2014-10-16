@@ -182,7 +182,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     IP_XMOS =       udp->IP_XMOS;
     port_XMOS =     udp->port_XMOS;
     main_tab =  this->parent()->findChild<MainTab*>("MainTab");
-    QString aliasText[8] ={"Left" , "Right" , "Center" , "Rear"};
+    QString aliasText[8] ={"Left Top" , "Right Top" , "Left Sub" , "Right Sub" , "Center Top" , "Rear" , "Center Sub" , "Center Sub" };
 
     topLayout = new QGridLayout;
     layout = new QGridLayout;
