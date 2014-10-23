@@ -8,6 +8,9 @@
 #include "eqchannel.h"
 #include "UDPcommands.h"
 
+#define SETMAXIMUMWIDTH 100
+#define ROWS 6
+#define COLUMNS 5
 
 //**************************************************************************
 class EQTab : public QWidget
@@ -22,6 +25,8 @@ public:
     double getLinkedFc();
     void setPreGain(double pregain, bool);
     double getPreGain();
+    void fsChanged(int newfs);
+    int fs=FS;
 
 public slots:
 void slot_linkchannel(int channel);
@@ -30,8 +35,10 @@ void updateLinkedFc(bool blocked);
 void slot_linkedFcChanged(double fc);
 void slot_PreGainChanged(double gain);
 void slot_sendPreGain();
+void slot_LookupTable();
 
 private:
+
     QTabWidget *channelTabs;
     QGridLayout *layout;
     int activeChannel;
@@ -44,12 +51,18 @@ private:
     QVBoxLayout *layout_PreGain;
     Knob *knob_PreGain;
     const double scale=2147483647;
+    QPushButton *button_Qlookup;
 
     QByteArray datagram;
     QUdpSocket  *UDP_Socket;
     QHostAddress *IP_XMOS;
     quint16 *port_XMOS;
     MainTab* main_tab;
+
+    QTableWidget *butterworthTable;
+    QTableWidgetItem *butterworthTableItem[ROWS][COLUMNS];
+
+    QDialog* butterworthDialog;
 };
 
   // *****************************************************

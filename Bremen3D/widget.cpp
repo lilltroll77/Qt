@@ -109,6 +109,7 @@ void Widget::readDatagram(){
             val = (unsigned char) datagram_RX[1];
             fs  = (int*) &datagram_RX[4];
             main_tab->setLock((bool) val , *fs);
+            eq_tab->fsChanged(*fs);
             break;
         case PING:
              statusbar->showMessage(tr("Connected"),1100);
@@ -148,7 +149,7 @@ void Widget::readDatagram(){
                 eq_tab->setLinkedFc( *LinkedFc , true); //Must be done in the end
                 for(ch=0 ; ch<CHANNELS ; ch++){
                     for(int sec=0 ; sec<SECTIONS ; sec++)
-                        eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false); //update all freqz for all sections and for all channels
+                        eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false , eq_tab->fs); //update all freqz for all sections and for all channels
                     eq_tab->channel[ch]->recalc_graph(); //update the plot for that channel
                 }
             }

@@ -72,9 +72,9 @@ Knob::Knob(QWidget *parent ,const Scale scaletype) :
         layout = new QVBoxLayout;
         layout->setSpacing(2);
         layout->setContentsMargins(1,1,1,5);
-        layout->addWidget(label_title , 0 ,Qt::AlignHCenter);
-        layout->addWidget(dial,Qt::AlignHCenter);
-        layout->addWidget(spinbox,Qt::AlignHCenter);
+        layout->addWidget(label_title , 0 ,Qt::AlignHCenter | Qt::AlignBottom );
+        layout->addWidget(dial,0,Qt::AlignHCenter);
+        layout->addWidget(spinbox,0,Qt::AlignHCenter | Qt::AlignTop);
         //layout->addWidget(lineEdit_min,2,0, Qt::AlignBottom | Qt::AlignLeft);
         //layout->addWidget(lineEdit_max,2,0, Qt::AlignBottom | Qt::AlignRight);
         setLayout(layout);

@@ -3,13 +3,12 @@
 #include "eqtab.h" // to acess static f and ejw
 #include "widget.h"
 
-EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Knob *knob_linkedFc_ref):
+EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Knob *knob_linkedFc_ref , int* fs):
       QWidget(parent)
   {
       plot = new_plot;
-
+      fs_ptr=fs;
       knob_linkedFc = this->parent()->parent()->findChild<Knob*>("knob_linkedFc");
-
       main_tab=this->parent()->parent()->parent()->parent()->findChild<MainTab*>("MainTab");
 
       UDP_Socket    = udp->UDP_Socket;
@@ -34,7 +33,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       knob_fc = new Knob(this,logScale);
       knob_fc-> setTitle("Fc [Hz]");
       knob_fc-> setKnobColor("rgb(255, 127, 127)");
-      knob_fc->setRange(10,20000,100);
+      knob_fc->setRange( FMIN , FMAX , 100);
       knob_fc->setDecimals(0);
       knob_fc->setSingleStep(1);
       knob_fc->setValue(DEFAULT_FC);
@@ -42,7 +41,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       knob_Q-> setTitle("Q");
       knob_Q-> setKnobColor("rgb(127, 255, 127)");
       knob_Q->setRange(0.1,10,100);
-      knob_Q->setDecimals(2);
+      knob_Q->setDecimals(3);
       knob_Q->setSingleStep(0.01);
       knob_Q->setValue(DEFAULT_Q);
       knob_gain = new Knob(this, linScale);
@@ -76,11 +75,11 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       layout->setSpacing(0);
       layout->setMargin(0);
       groupBox->setLayout(layout);
-      groupBox->setMaximumWidth(SETMAXIMUMWIDTH+10);
+      groupBox->setMinimumWidth(SETMAXIMUMWIDTH);
       groupBox->setCheckable(true);
       groupBox->setChecked(false);
       groupBox->setToolTip(tr("Filter ON/BYPASS"));
-      groupBox->setContentsMargins(3,3,3,3);
+      groupBox->setContentsMargins(1,1,1,1);
       connect(link ,      SIGNAL(clicked(bool)) , knob_fc ,       SLOT(setDisabled(bool)) );
 
       connect(knob_gain , SIGNAL(valueChanged(double)) , this ,   SLOT(slot_gainChanged(double)));
@@ -144,10 +143,21 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::setFc(double Fc , bool blocked){
-      if(blocked)
+      if(blocked){
+
           knob_fc->blockSignals(true);
-      if(knob_fc->isEnabled()==true);
-        knob_fc->setValue(Fc);
+          float fc_f = float(Fc);
+          //Send UDP
+          const char *ptr = (const char *) &fc_f;
+          datagram.clear();
+          datagram[0]=FC_CHANGED;
+          datagram[1]=(char) channelID;
+          datagram[2]=(char) sectionID;
+          datagram.insert(4 , ptr , sizeof(float));
+          WRITEDATAGRAM
+      }
+      //if(knob_fc->isEnabled()==true)
+      knob_fc->setValue(Fc);
       eqTracer->setGraphKey(Fc);
       if(blocked)
           knob_fc->blockSignals(false);
@@ -186,7 +196,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
           groupBox->blockSignals(true);
       groupBox->setChecked(state);
       eqTracer->setVisible(state);
-      updateSettingsAndPlot(true); ///can be optimized
+      updateSettingsAndPlot(true , *fs_ptr); ///can be optimized
       if(blocked)
           groupBox->blockSignals(false);
       }
@@ -203,13 +213,14 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
         filterType->blockSignals(false);
     }
 
-  void::EQSection::updateSettingsAndPlot(bool updatePlot){
+  void::EQSection::updateSettingsAndPlot(bool updatePlot , int new_fs){
+      fs = new_fs;
       EQ_section_t EQ;
       EQ.Fc = knob_fc->Value();
       EQ.Q =  knob_Q->Value();
       EQ.Gain = knob_gain->Value();
       EQ.type = (filterType_t)  filterType->currentIndex();
-      calcFilt( EQ, 44100 , B  ,A );
+      calcFilt( EQ, fs , B  ,A );
       freqz(B ,A , freq);
       if(updatePlot)
         emit eqchanged(); //Signal to parent its time to update plot
@@ -219,7 +230,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   //SLOTS
   void EQSection::slot_gainChanged(double gain){
       main_tab->setMode(USER);
-      updateSettingsAndPlot(true);
+      updateSettingsAndPlot(true,fs);
       float gain_f=(float) gain;
       const char *ptr = (const char *) &gain_f;
 
@@ -234,7 +245,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
 
   void EQSection::slot_Q_Changed(double Q){
       main_tab->setMode(USER);
-      updateSettingsAndPlot(true);
+      updateSettingsAndPlot(true,fs);
       float Q_f=(float) Q;
       const char *ptr = (const char *) &Q_f;
       datagram.clear();
@@ -249,7 +260,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   void EQSection::slot_fcChanged(double fc){
       main_tab->setMode(USER);
       eqTracer->setGraphKey(fc);
-      updateSettingsAndPlot(true);
+      updateSettingsAndPlot(true,fs);
       float fc_f = (float) fc;
       const char *ptr = (const char *) &fc_f;
       datagram.clear();
@@ -270,7 +281,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       else
           knob_Q->setDisabled(false);
       main_tab->setMode(USER);
-      updateSettingsAndPlot(true);
+      updateSettingsAndPlot(true,fs);
       datagram.clear();
       datagram[0]=FILTERTYPE_CHANGED;
       datagram[1]=(char) channelID;
@@ -290,7 +301,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       main_tab->setMode(USER);
 
        eqTracer->setVisible(state);
-        updateSettingsAndPlot(true); ///can be optimized
+        updateSettingsAndPlot(true,fs); ///can be optimized
 
        datagram.clear();
        datagram[0]=EQ_ACTIVE_CHANGED;

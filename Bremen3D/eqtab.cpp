@@ -12,6 +12,153 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     main_tab=this->parent()->parent()->findChild<MainTab*>("MainTab");
 
 
+    butterworthDialog =new QDialog(this);
+    butterworthDialog->setMinimumWidth(480);
+    butterworthDialog->setMinimumHeight(250);
+    butterworthDialog->setWindowTitle("Q-value lookup table");
+    //butterworthDialog->setWhatsThis("test");
+    QVBoxLayout* butterworthLayout = new QVBoxLayout(this);
+    butterworthTable = new QTableWidget(6 , 5 , this);
+    QStringList horz;
+    horz<<"Filter type"<<"Section 1"<<"Section 2"<<"Section 3"<<"Phase @ fc";
+    butterworthTable->setHorizontalHeaderLabels(horz);
+    int row,col;
+    for(col=1 ; col<=4 ; col++)
+        butterworthTable->setColumnWidth(col,80);
+
+
+    const char first[]="1:st order";
+    const char firstT[]="Select 1:st order filter";
+    const char butt1[]="Butt-1";
+    const char butt1T[]="First order Butterworth filter";
+    const char butt3[]="Butt-3";
+    const char butt3T[]="Third order Butterworth filter";
+    const char butt5[]="Butt-5";
+    const char butt5T[]="Fifth order Butterworth filter";
+    const char lr2[]="LR-2";
+    const char lr2T[]="Second order Linkwitz–Riley filter";
+    const char lr4[]="LR-4";
+    const char lr4T[]="Fourth order Linkwitz–Riley filter";
+    const char lr6[]="LR-6";
+    const char lr6T[]="Sixth order Linkwitz–Riley filter";
+    const char invert[]="The polarity of the subwoofer channels should be selected to 'inverted' in DAC tab";
+    float Q2=0.5;
+    float Q3=1;
+    float Q4[2]={1/sqrt(2),1/sqrt(2)};
+    float Q5[2]={1/1.6180,1/0.6180};
+    float Q6[3]={0.5 , 1 , 1};
+
+    QBrush brush_lightred(QColor(255,192,192) , Qt::SolidPattern );
+
+    for(row=0 ; row < ROWS ; row++)
+        for(col=0 ; col < COLUMNS ; col++){
+            butterworthTableItem[row][col] = new QTableWidgetItem(QTableWidgetItem::Type);
+            butterworthTableItem[row][col]->setFlags(Qt::ItemIsEnabled | Qt::ItemNeverHasChildren);
+            butterworthTableItem[row][col]->setTextAlignment(Qt::AlignCenter);
+            butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+        }
+row=0;
+    col=0;
+    butterworthTableItem[row][col]->setText(butt1);
+    butterworthTableItem[row][col]->setToolTip(butt1T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+    col=1;
+    butterworthTableItem[row][col]->setText(first);
+    butterworthTableItem[row][col]->setToolTip(firstT);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=90°"));
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+
+row=1;
+    col=0;
+    butterworthTableItem[row][col]->setText(lr2);
+    butterworthTableItem[row][col]->setToolTip(lr2T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=1;
+    butterworthTableItem[row][col]->setText(QString("Q=%1").arg(Q2));
+    butterworthTableItem[row][col]->setToolTip( QString("Select 2:nd order filter with Q=%1").arg(Q2));
+    butterworthTableItem[row][col]->setTextAlignment(Qt::AlignCenter);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=180°"));
+    butterworthTableItem[row][col]->setBackground(brush_lightred);
+    butterworthTableItem[row][col]->setToolTip(invert);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+row=2;
+    col=0;
+    butterworthTableItem[row][col]->setText(butt3);
+    butterworthTableItem[row][col]->setToolTip(butt3T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=1;
+    butterworthTableItem[row][col]->setText(first);
+    butterworthTableItem[row][col]->setToolTip(firstT);
+        butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=2;
+    butterworthTableItem[row][col]->setText(QString("Q=%1").arg(Q3));
+    butterworthTableItem[row][col]->setToolTip( QString("Select 2:nd order filter with Q=%1").arg(Q3));
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=-90°"));
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+row=3;
+    col=0;
+    butterworthTableItem[row][col]->setText(tr(lr4));
+    butterworthTableItem[row][col]->setToolTip(lr4T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    for(col=1 ; col<=2 ; col++){
+        butterworthTableItem[row][col]->setText(QString("Q=%1").arg(Q4[col-1],0, 'f' ,3 ));
+        butterworthTableItem[row][col]->setToolTip( QString("Select 2:nd order filter with Q=%1").arg(Q4[col-1],0, 'f' ,3 ));
+        butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    }
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=0°"));
+     butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+row=4;
+    col=0;
+    butterworthTableItem[row][col]->setText(tr(butt5));
+    butterworthTableItem[row][col]->setToolTip(butt5T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    col=1;
+    butterworthTableItem[row][col]->setText(first);
+    butterworthTableItem[row][col]->setToolTip(firstT);
+    butterworthTableItem[row][col]->setTextAlignment(Qt::AlignCenter);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    for(col=2 ; col<=3 ; col++){
+        butterworthTableItem[row][col]->setText(QString("Q=%1").arg(Q5[col-2],0 , 'f' ,3 ));
+        butterworthTableItem[row][col]->setToolTip( QString("Select 2:nd order filter with Q=%1").arg(Q5[col-2],0 , 'f' ,3 ));
+        butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    }
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=90°"));
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+
+row=5;
+    col=0;
+    butterworthTableItem[row][col]->setText(tr(lr6));
+    butterworthTableItem[row][col]->setToolTip(lr6T);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    for(col=1 ; col<=3 ; col++){
+        butterworthTableItem[row][col]->setText(QString("Q=%1").arg(Q6[col-1],0 , 'f' ,3 ));
+        butterworthTableItem[row][col]->setToolTip( QString("Select 2:nd order filter with Q=%1").arg(Q6[col-1],0 , 'f' ,3 ));
+        butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+    }
+    col=4;
+    butterworthTableItem[row][col]->setText(QString("φ=180°"));
+    butterworthTableItem[row][col]->setBackground(brush_lightred);
+    butterworthTableItem[row][col]->setToolTip(invert);
+    butterworthTable->setItem(row, col, butterworthTableItem[row][col]);
+
+    butterworthLayout->addWidget(butterworthTable);
+    butterworthDialog->setLayout(butterworthLayout);
+
+
     UDP_Socket = udp->UDP_Socket;
     IP_XMOS = udp->IP_XMOS;
     port_XMOS = udp->port_XMOS;
@@ -21,7 +168,7 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     plotMag = new QCustomPlot(this);
     activeChannel=0;
 
-    init_freqz(FMIN , FS/2);
+    calc_freqz(FMIN , FMAX , fs);
 
     //   linked fc
     knob_linkedFc = new Knob(this,logScale);
@@ -45,9 +192,10 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     connect(knob_PreGain , SIGNAL(valueChanged(double)) , this , SLOT(slot_PreGainChanged(double)) );
 
 
+
     //Create channel tabs
     for(int i=0 ; i<CHANNELS ;i++){
-        channel[i] = new EQChannel(this , i , plotMag ,udp ,knob_linkedFc);
+        channel[i] = new EQChannel(this , i , plotMag ,udp ,knob_linkedFc , &fs);
         channelTabs->addTab(channel[i] , (QString("%1").arg(i)) );
         connect(channelTabs , SIGNAL(currentChanged(int)) , this , SLOT(slot_updatePlot(int)));
     }
@@ -57,8 +205,9 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     channelTabs->setToolTip(tr("Channel Selector"));
     channelTabs->setTabPosition(QTabWidget::West);
     //channelTabs->setVisible(false);
-    layout->addWidget(channelTabs,0,0,1,2);
-    layout->setContentsMargins(3,3,3,3);
+    channelTabs->setMaximumWidth(SECTIONS*(SETMAXIMUMWIDTH+10)+140);
+    layout->addWidget(channelTabs,0,0,1,5);
+    layout->setContentsMargins(2,2,2,2);
 
     layout_linkedFc = new QVBoxLayout;
     layout_linkedFc->addWidget(knob_linkedFc);
@@ -70,17 +219,22 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     box_linkedFc->setLayout(layout_linkedFc);
     box_linkedFc->setTitle(tr("Linked fc"));
     box_linkedFc->setMaximumHeight(130);
-    box_linkedFc->setMaximumWidth(80);
-    layout->addWidget(box_linkedFc,1,1);
+    box_linkedFc->setMaximumWidth(SETMAXIMUMWIDTH);
+    layout->addWidget(box_linkedFc,1,2);
 
     box_PreGain = new QGroupBox;
     box_PreGain->setLayout(layout_PreGain);
     box_PreGain->setTitle(tr("Pre Gain"));
     box_PreGain->setMaximumHeight(130);
-    box_PreGain->setMaximumWidth(80);
+    box_PreGain->setMaximumWidth(SETMAXIMUMWIDTH);
     box_PreGain->setToolTip(tr("Sets the pre filter gain\nThis is needed when using filters with Q-values>0.5 to prevent clipping"));
-    layout->addWidget(box_PreGain,1,0);
+    layout->addWidget(box_PreGain,1,1);
 
+    button_Qlookup = new QPushButton("Q-Lookup"  ,this);
+    button_Qlookup->setMaximumWidth(80);
+    button_Qlookup->setToolTip("Lookup table for filter Q-values");
+    connect(button_Qlookup , SIGNAL(clicked()) ,this , SLOT(slot_LookupTable()));
+    layout->addWidget(button_Qlookup,1,3);
 
     plotMag->xAxis->setScaleType(QCPAxis::stLogarithmic);
     plotMag->xAxis->setAutoSubTicks(false);
@@ -101,11 +255,14 @@ EQTab::EQTab(QWidget *parent , Network *udp) :
     plotMag->yAxis->setSubTickCount(4);
     //plot->legend->setUserData();
 
+    plotMag->setMinimumWidth(320);
     plotMag->replot();
 
-    layout->addWidget(plotMag,0,3,2,3);
-    //layout->setColumnStretch(0,1);
-    layout->setColumnStretch(1,1);
+    layout->addWidget(plotMag,0,5,2,1);
+    for(int col=0; col<5 ; col++)
+        layout->setColumnStretch(col,1);
+    layout->setColumnStretch(5,2);
+    //layout->setColumnStretch(3,1);
     setLayout(layout);
 }
 
@@ -121,6 +278,10 @@ double EQTab::getPreGain(){
     return knob_PreGain->Value();
 }
 
+void EQTab::slot_LookupTable(){
+    butterworthDialog->show();
+}
+
 void EQTab::slot_sendPreGain(){
     float gain =(float) knob_PreGain->Value();
     const char* ptr = (const char*) &gain;
@@ -132,14 +293,19 @@ void EQTab::slot_sendPreGain(){
 
 void EQTab::updateLinkedFc(bool blocked){
     double fc=knob_linkedFc->Value();
-    for(int ch=0 ; ch<CHANNELS ;ch++)
+    for(int ch=0 ; ch<CHANNELS ;ch++){
         for(int sec=0 ; sec<SECTIONS ; sec++)
             if(channel[ch]->eqSection[sec]->getLinked()){
                 channel[ch]->eqSection[sec]->setFc(fc , blocked);
-   }
+                //Recalc transfer function, but wait with replot
+                channel[ch]->eqSection[sec]->updateSettingsAndPlot(false , fs);
+        }
+   channel[ch]->recalc_graph();
+    }
 }
 
 void EQTab::setLinkedFc(double fc, bool blocked){
+    main_tab->setMode(USER);
     if(blocked)
         knob_linkedFc->blockSignals(true);
     knob_linkedFc->setValue(fc);
@@ -164,7 +330,7 @@ void EQTab::slot_PreGainChanged(double gain){
 
 void EQTab::slot_linkedFcChanged(double fc){
     main_tab->setMode(USER);
-    updateLinkedFc(false);
+    updateLinkedFc(true);
 
 
     /// Fix so the update of the plot only happens once
@@ -211,6 +377,20 @@ void EQTab::slot_linkchannel(int val){
    //channel[slaveCh]->linkChannel[masterCh]->setChecked(true);
 
 }
+
+void EQTab::fsChanged(int newfs){
+    fs=newfs;
+    calc_freqz(FMIN , fs/2 , fs);
+    plotMag->xAxis->setRange(FMIN , fs/2);
+     //recalc everything regarding graph
+     for(int ch=0 ; ch<CHANNELS ;ch++){
+         for(int sec=0 ; sec<SECTIONS ; sec++)
+            channel[ch]->eqSection[sec]->updateSettingsAndPlot(false , fs);
+
+        channel[ch]->recalc_graph();
+     }
+}
+
 
 // **************************************************************
 

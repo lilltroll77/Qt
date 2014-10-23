@@ -3,11 +3,11 @@
 //#include "filter.h"
 
 
-#define VERSION "0.67"
-#define COMPILEDATE "2014-10-16"
+#define VERSION "0.68"
+#define COMPILEDATE "2014-10-22"
 #define FS 44100
 #define FMIN 10
-#define SETMAXIMUMWIDTH 80
+#define FMAX 20000
 #define DEFAULT_CHANNEL 0
 #define DEFAULT_FC 1000
 #define DEFAULT_Q 0.707

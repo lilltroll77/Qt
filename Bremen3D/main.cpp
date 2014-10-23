@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     qApp->addLibraryPath(".\libs");
-    qApp->setOrganizationName("Crazy Horse");
+    qApp->setOrganizationName("Bremen OA");
     qApp->setApplicationVersion(VERSION);
     MainWindow w;
     w.show();

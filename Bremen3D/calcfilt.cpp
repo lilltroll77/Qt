@@ -5,6 +5,8 @@
 #include "defines.h"
 #include "calcfilt.h"
 
+
+
 std::complex<double> ejw[PLOTSIZE];
 std::complex<double> jw;
 std::complex<double> one(1,0);
@@ -16,12 +18,12 @@ QVector<double>* f_ref(){
 }
 
 
-void init_freqz(double fmin , double fmax)
+void calc_freqz(double fmin , double fmax , int fs)
 {
-    double S =log10(fmax) / log10(fmin);
+    double S = log10(fmax) / log10(fmin);
     for (int i=0; i<PLOTSIZE; ++i){
         f[i] = FMIN *pow(10 ,S*(double) i / PLOTSIZE);
-        jw.imag(2* M_PI * f[i] / FS);
+        jw.imag(2* M_PI * f[i] / (double)fs);
         ejw[i]=exp(jw); // Precalc e^jw and where w = 2*pi f/fs
      }
 }
@@ -54,6 +56,16 @@ double a0 ,a1 ,a2 ,b0,b1,b2;
     % lowShelf
     % highSelf
    */
+//Disable the filter with H=1 of f is out of bound
+    if( EQ.Fc < 10 || EQ.Fc > fs *0.48  ){
+        Bcoef[0]=1;
+        Bcoef[1]=0;
+        Bcoef[2]=0;
+        Acoef[0]=0;
+        Acoef[1]=0;
+        return;
+    }
+
     double w0 = 2 * M_PI * EQ.Fc/fs;
     double alpha=sin(w0)/(2 * EQ.Q);
     double A = pow(10,EQ.Gain/40);

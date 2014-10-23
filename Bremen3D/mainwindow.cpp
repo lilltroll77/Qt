@@ -182,7 +182,7 @@ void MainWindow::slot_open(){
         in >> central_widget->eq_tab->channel[ch]->eqSection[sec]->A[1];
 
          //update freq response data in struct but do not redraw
-        central_widget->eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false);
+        central_widget->eq_tab->channel[ch]->eqSection[sec]->updateSettingsAndPlot(false , central_widget->eq_tab->fs );
     }
    central_widget->eq_tab->channel[ch]->recalc_graph();
   }

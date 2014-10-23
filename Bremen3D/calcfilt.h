@@ -25,7 +25,7 @@ typedef struct{
 
 QVector<double>* f_ref();
 void calcFilt(EQ_section_t &EQ , double fs, double Bcoef[3] , double Acoef[2] );
-void init_freqz(double fmin , double fmax );
+void calc_freqz(double fmin , double fmax , int fs);
 void freqz(double B[3] , double A[2] , std::complex<double> H[]);
 
 #endif // CALCFILT_H
