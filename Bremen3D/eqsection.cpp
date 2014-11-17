@@ -143,10 +143,9 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
   }
 
   void EQSection::setFc(double Fc , bool blocked){
-      if(blocked){
-
-          knob_fc->blockSignals(true);
-          float fc_f = float(Fc);
+      if(blocked)
+        knob_fc->blockSignals(true);
+          /*float fc_f = float(Fc);
           //Send UDP
           const char *ptr = (const char *) &fc_f;
           datagram.clear();
@@ -154,8 +153,8 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
           datagram[1]=(char) channelID;
           datagram[2]=(char) sectionID;
           datagram.insert(4 , ptr , sizeof(float));
-          WRITEDATAGRAM
-      }
+          WRITEDATAGRAM*/
+
       //if(knob_fc->isEnabled()==true)
       knob_fc->setValue(Fc);
       eqTracer->setGraphKey(Fc);

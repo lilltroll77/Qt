@@ -27,7 +27,7 @@ class MainTab : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainTab(QWidget *parent = 0 ,  Network *udp =0);
+    explicit MainTab(QWidget *parent = 0 ,  Network *udp_ref =0);
     void setMuteState(bool , bool blocked);
     bool getMuteState();
 
@@ -108,6 +108,7 @@ private:
     int mode=PRESET;
 
     //UDP
+    Network *udp;
     QUdpSocket  *UDP_Socket;
     QHostAddress *IP_XMOS;
     quint16 *port_XMOS;

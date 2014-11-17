@@ -182,7 +182,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     IP_XMOS =       udp->IP_XMOS;
     port_XMOS =     udp->port_XMOS;
     main_tab =  this->parent()->findChild<MainTab*>("MainTab");
-    QString aliasText[8] ={"Left Top" , "Right Top" , "Left Sub" , "Right Sub" , "Center Top" , "Rear" , "Center Sub" , "Center Sub" };
+    QString aliasText[8] ={"Left Top" , "Right Top" ,"Left Sub" , "Right Sub"  , "Center Top" , "Rear" , "Center Sub" , "Center Sub" };
 
     topLayout = new QGridLayout;
     layout = new QGridLayout;
@@ -201,6 +201,8 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBox->setLayout(layout);
     groupBox->setContentsMargins(0,0,0,0);
     groupBox->setTitle("Individual DAC channel settings");
+    groupBox->setFixedHeight(250);
+    groupBox->setFixedWidth(800);
     topLayout->addWidget(groupBox,1,0,1,4);
     groupBoxReconstruct = new QGroupBox;
     groupBoxReconstruct->setTitle(tr("Reconstruction filter"));
@@ -233,7 +235,8 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     layoutReconstruct->addWidget(IIRFilter);
     layoutReconstruct->addWidget(FIRlabel);
     layoutReconstruct->addWidget(FIRFilter);
-    groupBoxReconstruct->setMaximumHeight(120);
+    groupBoxReconstruct->setFixedHeight(140);
+    groupBoxReconstruct->setFixedWidth(150);
     groupBoxReconstruct->setLayout(layoutReconstruct);
     topLayout->addWidget(groupBoxReconstruct,0,0,1,1);
     setLayout(topLayout);

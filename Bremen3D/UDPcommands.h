@@ -20,6 +20,7 @@ struct Network{
     QHostAddress *IP_LOCAL;
     QHostAddress *IP_RX;
     quint16 *port_XMOS;
+    quint16 *port_Local;
 };
 
 enum UDPcommands{

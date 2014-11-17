@@ -206,6 +206,7 @@ row=5;
     channelTabs->setTabPosition(QTabWidget::West);
     //channelTabs->setVisible(false);
     channelTabs->setMaximumWidth(SECTIONS*(SETMAXIMUMWIDTH+10)+140);
+    channelTabs->setFixedHeight(450);
     layout->addWidget(channelTabs,0,0,1,5);
     layout->setContentsMargins(2,2,2,2);
 
@@ -296,7 +297,7 @@ void EQTab::updateLinkedFc(bool blocked){
     for(int ch=0 ; ch<CHANNELS ;ch++){
         for(int sec=0 ; sec<SECTIONS ; sec++)
             if(channel[ch]->eqSection[sec]->getLinked()){
-                channel[ch]->eqSection[sec]->setFc(fc , blocked);
+                channel[ch]->eqSection[sec]->setFc(fc , false);
                 //Recalc transfer function, but wait with replot
                 channel[ch]->eqSection[sec]->updateSettingsAndPlot(false , fs);
         }

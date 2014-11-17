@@ -19,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     progress->setMinimumDuration(0);
 
 
+
+    //ethernet.IP_XMOS->setAddress(XMOS_IPADRESS);
+    //ethernetport_Local = LOCAL_PORT;
+
     msgBoxAbout = new QMessageBox;
     msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2014").arg(VERSION).arg(COMPILEDATE) );
     msgBoxAbout->setFixedWidth(640);
@@ -311,35 +315,57 @@ void MainWindow::slot_syncToHost(bool button){
     delete msgBox;
   }
 
+void MainWindow::slot_IP_changed(){
+    //ethernet.IP_XMOS->setAddress( lineEditXMOSIP->text() );
+}
+
+void MainWindow::slot_Port_changed(){
+    //QString lineEditPCPort->text();
+    //ethernet.port_Local =
+}
+
+
 void MainWindow::slot_networkSettings(){
-    QMessageBox* msgBox = new QMessageBox;
-    msgBox->setFixedWidth(480);
-    msgBox->setFixedWidth(320);
-    msgBox->setWindowTitle("Network settings");
-    msgBox->setText(QString("STATIC XMOS IP: %1\nXMOS port: %2\n").arg(XMOS_IPADRESS).arg(XMOS_PORT));
-    //msgBox->
-    msgBox->exec();
-    delete msgBox;
-/*
-    box_ethernet        = new QGroupBox;
-    buttonPingXMOS      = new QPushButton(tr("PING XMOS"));
-    ethernetLayout      = new QGridLayout;
-    lineEditXMOSIP      = new QLineEdit;
-    buttonPingXMOS->setToolTip(tr("Test if XMOS is available on Network"));
-    buttonPingXMOS->setFixedWidth(100);
+    QDialog* networkDialog = new QDialog(this);
+    QPushButton* networkButton = new QPushButton("Ok" , this);
+    networkButton->setFixedWidth(60);
+    connect(networkButton , SIGNAL(clicked()) , networkDialog , SLOT(close()) );
+    QGridLayout* networkLayout = new QGridLayout(this);
 
-    lineEditXMOSIP->setToolTip("IP Adress of XMOS box");
-    lineEditXMOSIP->setText(QString("IP: %1").arg(XMOS_IPADRESS));
-    lineEditXMOSIP->setFixedWidth(120);
-    lineEditXMOSIP->setInputMask("IP: 000.000.000.000");
-    ethernetLayout->addWidget(buttonPingXMOS,1,0);
-    ethernetLayout->addWidget(lineEditXMOSIP,0,0);
-    box_ethernet->setToolTip(tr("Ethernet settings"));
-    box_ethernet->setTitle(tr("Ethernet"));
-    box_ethernet->setMaximumWidth(350);
-    box_ethernet->setMaximumHeight(200);
-    box_ethernet->setLayout(ethernetLayout);*/
+    QLabel* IP_label = new QLabel("IP:",this);
+    QLabel* Port_label = new QLabel("Port:",this);
 
+    QLineEdit* lineEditXMOSIP = new QLineEdit(this) ;
+    QLineEdit* lineEditPCPort = new QLineEdit(this);
+
+    lineEditXMOSIP->setInputMask("000.000.000.000");
+    lineEditXMOSIP->setFixedWidth(150);
+    lineEditPCPort->setInputMask("00000");
+    lineEditPCPort->setFixedWidth(150);
+    connect(lineEditXMOSIP , SIGNAL(editingFinished()) , this , SLOT(slot_IP_changed()));
+    connect(lineEditXMOSIP , SIGNAL(editingFinished()) , this , SLOT(slot_Port_changed()));
+
+    lineEditXMOSIP->setText(QString("%1").arg(XMOS_IPADRESS));
+    lineEditXMOSIP->setToolTip("IP adress of XMOS");
+
+    lineEditPCPort->setText(QString("%1").arg(LOCAL_PORT));
+    lineEditPCPort->setToolTip("Ethernet port number used by PC to transmit IP traffic on");
+
+    networkDialog->setFixedWidth(240);
+    networkDialog->setFixedHeight(120);
+    networkDialog->setWindowTitle("Network settings");
+
+    networkLayout->addWidget(IP_label       , 0 , 0 , Qt::AlignRight);
+    networkLayout->addWidget(lineEditXMOSIP , 0 , 1);
+    networkLayout->addWidget(Port_label     , 1 , 0 , Qt::AlignRight);
+    networkLayout->addWidget(lineEditPCPort , 1 , 1);
+    networkLayout->addWidget(networkButton  , 2 , 2 , Qt::AlignRight);
+    networkLayout->setColumnStretch(0,0);
+    networkLayout->setColumnStretch(1,0);
+    networkLayout->setColumnStretch(2,1);
+    networkDialog->setLayout(networkLayout);
+    networkDialog->exec();
+    delete networkDialog;
 
 }
 

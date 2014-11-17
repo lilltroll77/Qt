@@ -2,12 +2,13 @@
 #include "centralwidget.h"
 #include <QDebug>
 
-MainTab::MainTab(QWidget *parent ,  Network *udp) :
+MainTab::MainTab(QWidget *parent ,  Network *udp_ref) :
     QWidget(parent){
 
-    UDP_Socket = udp->UDP_Socket;
-    IP_XMOS = udp->IP_XMOS;
-    port_XMOS = udp->port_XMOS;
+    //udp = udp_ref;
+    UDP_Socket = udp_ref->UDP_Socket;
+    IP_XMOS = udp_ref->IP_XMOS;
+    port_XMOS = udp_ref->port_XMOS;
 
     toplevel_statusbar=statusbar;
     top_layout = new QGridLayout;
@@ -124,9 +125,15 @@ MainTab::MainTab(QWidget *parent ,  Network *udp) :
 
 
     // Top layout
-    top_layout->addWidget(input_Groupbox ,3 , 0);
-    top_layout->addWidget(box_volume,0,2 ,9,1);
-    top_layout->addWidget(program_Groupbox ,2 , 1 ,4 ,1 );
+    top_layout->setColumnMinimumWidth(0,50);
+    top_layout->addWidget(input_Groupbox ,3 , 1);
+    top_layout->setColumnMinimumWidth(2,50);
+    top_layout->addWidget(program_Groupbox ,3 , 3);
+    top_layout->setColumnMinimumWidth(4,50);
+    top_layout->addWidget(box_volume,0,5 ,9,1);
+    //top_layout->setColumnStretch(4,1);
+    top_layout->setColumnStretch(6,1);
+
 
     //SIGNAL
     connect(slider_MasterVolume ,   SIGNAL(valueChanged(int))       , this ,    SLOT(slot_volumesliderChanged(int) ) );
@@ -231,8 +238,10 @@ void MainTab::setProgram(int new_program , bool blocked){
         program_knob->blockSignals(true);
     if(new_program==0)
         setMode(USER);
-    else
+    else{
         program_knob->setValue((double)new_program);
+        setMode(PRESET);
+    }
 
     if(blocked)
         program_knob->blockSignals(false);

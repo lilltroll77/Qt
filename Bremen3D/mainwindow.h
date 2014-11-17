@@ -63,6 +63,8 @@ void slot_graph_options();
 void slot_networkSettings();
 void slot_syncToHost(bool button);
 void slot_syncFromHost(bool button);
+void slot_IP_changed();
+void slot_Port_changed();
 
 private:
 void pause(int t);
@@ -92,6 +94,7 @@ QAction *graphAction;
 Settings_t programSettings[16];
 QTimer tmr;
 QProgressDialog* progress;
+Network ethernet;
 };
 
 
