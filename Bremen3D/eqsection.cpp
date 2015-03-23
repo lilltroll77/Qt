@@ -40,7 +40,7 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       knob_Q = new Knob(this, logScale);
       knob_Q-> setTitle("Q");
       knob_Q-> setKnobColor("rgb(127, 255, 127)");
-      knob_Q->setRange(0.1,10,100);
+      knob_Q->setRange(0.1 ,30 , 100);
       knob_Q->setDecimals(3);
       knob_Q->setSingleStep(0.01);
       knob_Q->setValue(DEFAULT_Q);

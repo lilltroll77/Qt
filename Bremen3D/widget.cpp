@@ -109,6 +109,7 @@ void Widget::readDatagram(){
             val = (unsigned char) datagram_RX[1];
             fs  = (int*) &datagram_RX[4];
             main_tab->setLock((bool) val , *fs);
+            dac_tab->setLock((bool) val);
             eq_tab->fsChanged(*fs);
             break;
         case PING:

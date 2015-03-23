@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 #include <QGlobalStatic>
 
-#define XMOS_IPADRESS "192.168.2.99"
+#define XMOS_IPADRESS "192.168.0.99"
 #define LOCAL_IPADRESS "127.0.0.1"
 #define RX_IPADRESS "127.0.0.1"
 #define LOCAL_PORT 2222
@@ -53,7 +53,9 @@ enum UDPcommands{
     PROGRAM_CHANGED,
     DACLOCK_CHANGED,
     GET_DACLOCK_FS,
-    SPDIF_CHANGED
+    SPDIF_CHANGED,
+    DAC_DPPL,
+    DAC_DPPL_128X
 };
 
 

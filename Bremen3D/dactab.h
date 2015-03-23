@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QUdpSocket>
 #include <QComboBox>
+#include <QCheckBox>
 #include "classes/knob.h"
 #include "UDPcommands.h"
 #include "maintab.h"
@@ -18,7 +19,7 @@
 //#include "widget.h"
 enum IIRBandWidth_t{Normal , F50kHz , F60kHz , F70kHz};
 enum FIRfilter_t{FastRolloff,SlowRolloff,userDefined};
-enum DPPL_BW_t{NO_BW,LOWEST_BW,LOW_BW,MEDLOW_BW,MEDIUM_BW,MEDHIGH_BW,HIGH_BW,HIGEST_BW};
+enum DPLL_BW_t{NO_BW,LOWEST_BW,LOW_BW,MIDLOW_BW,MID_BW,MIDHIGH_BW,HIGH_BW,HIGHEST_BW,AUTO};
 enum polarity_t{InPhase,AntiPhase};
 enum mute_t{unmuted , muted};
 enum bool_t{False=0 , True=1};
@@ -39,8 +40,8 @@ typedef struct{
       enum IIRBandWidth_t IIRfilter;
       enum FIRfilter_t FIRrolloff;
       enum bool_t UseDeemphaseFilter;
-      enum DPPL_BW_t DPPL_BW;
-      enum bool_t DPPL_BWx128;
+      enum DPLL_BW_t DPPL_BW;
+      enum bool_t DPLL_BWx128;
 }DAC_settings_t;
 
 class DACGain: public QWidget
@@ -92,7 +93,11 @@ public:
     DACGain *channel[8];
     QComboBox *IIRFilter;
     QComboBox *FIRFilter;
-    QLabel *DPLL;
+    QComboBox *DPLLbox;
+    QLabel *DPLLlabel;
+    QCheckBox *DPLL_X128;
+    QPushButton *buttonLock;
+    void setLock(bool state);
 
 signals:
 
@@ -100,11 +105,15 @@ public slots:
     void slot_sendDACsettings();
     void slot_FIRchanged(int val);
     void slot_IIRchanged(int val);
+    void slot_DPLLchanged(int val);
+    void slot_DPPL_x128changed(bool val);
 
 private:
 QGridLayout *layout;
 QVBoxLayout *layoutReconstruct;
+QVBoxLayout *layoutDPLL;
 QGroupBox *groupBoxReconstruct;
+QGroupBox *groupBoxDPLL;
 QGroupBox *groupBox;
 QGridLayout *topLayout;
 QLabel *IIRlabel;

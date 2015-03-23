@@ -3,8 +3,8 @@
 //#include "filter.h"
 
 
-#define VERSION "0.69B"
-#define COMPILEDATE "2014-11-17"
+#define VERSION "0.70"
+#define COMPILEDATE "2015-03-23"
 #define FS 44100
 #define FMIN 10
 #define FMAX 20000
@@ -18,5 +18,7 @@
 #define CHANNELS 8
 #define SECTIONS 8
 #define PLOTSIZE 400
+#define SHORTDELAY 7
+#define LONGDELAY 25
 
 #endif // DEFINES_H

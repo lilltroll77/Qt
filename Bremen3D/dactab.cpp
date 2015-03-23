@@ -208,6 +208,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBoxReconstruct->setTitle(tr("Reconstruction filter"));
     groupBoxReconstruct->setToolTip(tr("The settings of the reconstruction filter of the DAC\nFeature TBD!!"));
 
+
     IIRlabel = new QLabel;
     IIRlabel->setText("IIR filter for DSD");
     IIRFilter = new QComboBox;
@@ -238,7 +239,56 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBoxReconstruct->setFixedHeight(140);
     groupBoxReconstruct->setFixedWidth(150);
     groupBoxReconstruct->setLayout(layoutReconstruct);
+
+
+    groupBoxDPLL = new QGroupBox;
+    groupBoxDPLL->setTitle(tr("DPLL"));
+    groupBoxDPLL->setToolTip(tr("The Digital Phase Locked Loop settings of the jitter eliminator"));
+
+    DPLLlabel = new QLabel;
+    DPLLlabel->setText("DPPL bandwith");
+    DPLLbox = new QComboBox;
+    DPLLbox-> addItem("No BW"   , QVariant(NO_BW));
+    DPLLbox-> addItem("Lowest"  , QVariant(LOWEST_BW));
+    DPLLbox-> addItem("Low"     , QVariant(LOW_BW));
+    DPLLbox-> addItem("Mid-Low" , QVariant(MIDLOW_BW));
+    DPLLbox-> addItem("Mid"     , QVariant(MID_BW));
+    DPLLbox-> addItem("Mid-High", QVariant(MIDHIGH_BW));
+    DPLLbox-> addItem("High"    , QVariant(HIGH_BW));
+    DPLLbox-> addItem("Highest" , QVariant(HIGHEST_BW));
+    DPLLbox-> addItem("Auto" ,    QVariant(AUTO));
+    DPLLbox->setMaximumWidth(100);
+    DPLLbox-> setCurrentIndex(AUTO);
+    connect(DPLLbox , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_DPLLchanged(int)));
+
+    DPLL_X128 = new QCheckBox;
+    DPLL_X128->setToolTip("Multiply the DPPL settings with 128");
+    DPLL_X128->setText("128X");
+    connect(DPLL_X128 , SIGNAL(clicked(bool)) , this , SLOT(slot_DPPL_x128changed(bool)));
+
+    //Button Lock
+    buttonLock = new QPushButton(tr("NO LOCK"));
+    buttonLock ->setFixedWidth(60);
+    buttonLock ->setCheckable(false);
+    buttonLock ->setToolTip(tr("The status of the DAC's digital phase locked loop"));
+    //buttonLock ->setFlat(true);
+    buttonLock ->setStyleSheet("color: rgb(255, 0, 0)");
+    QFont font;
+    font.setBold(true);
+    buttonLock->setFont(font);
+
+    layoutDPLL = new QVBoxLayout;
+    layoutDPLL->addWidget(DPLLlabel);
+    layoutDPLL->addWidget(DPLLbox);
+    layoutDPLL->addWidget(DPLL_X128);
+    layoutDPLL->addWidget(buttonLock);
+    groupBoxDPLL->setFixedHeight(140);
+    groupBoxDPLL->setFixedWidth(150);
+    groupBoxDPLL->setLayout(layoutDPLL);
+
+
     topLayout->addWidget(groupBoxReconstruct,0,0,1,1);
+    topLayout->addWidget(groupBoxDPLL ,0,1,1,1);
     setLayout(topLayout);
 }
 
@@ -266,7 +316,9 @@ void DACTab::slot_sendDACsettings(){
         }
     DAC->FIRrolloff = (FIRfilter_t)FIRFilter->currentIndex();
     DAC->IIRfilter = (IIRBandWidth_t) IIRFilter->currentIndex();
-    //main_tab = parent()->findChild("MainTab");
+    DAC->DPPL_BW = (DPLL_BW_t) DPLLbox->currentIndex();
+    DAC->DPLL_BWx128 = (bool_t) DPLL_X128->isChecked();
+   //main_tab = parent()->findChild("MainTab");
     DAC->MasterVolume = (unsigned char) -2*(main_tab->getMasterVolume()); //½dB attenuation steps
     if(main_tab->getMuteState())
         DAC->MuteAll = True;
@@ -277,4 +329,29 @@ void DACTab::slot_sendDACsettings(){
     datagram.insert(4 , ptr , sizeof(DAC_settings_t));
     WRITEDATAGRAM
 
+}
+void DACTab::slot_DPLLchanged(int val){
+    datagram.clear();
+    datagram[0]=DAC_DPPL;
+    datagram[1]=(char) val;
+    WRITEDATAGRAM
+}
+
+void DACTab::slot_DPPL_x128changed(bool val){
+    datagram.clear();
+    datagram[0]=DAC_DPPL_128X;
+    datagram[1]=(char) val;
+    WRITEDATAGRAM
+}
+
+void DACTab::setLock(bool state){
+    if(state){
+        buttonLock ->setStyleSheet("color: rgb(0, 255, 0)");
+        buttonLock ->setText(tr("LOCKED"));
+
+    }else{
+        buttonLock ->setStyleSheet("color: rgb(255, 0, 0)");
+        buttonLock ->setText(tr("NO LOCK"));
+
+    }
 }
