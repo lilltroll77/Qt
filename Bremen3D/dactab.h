@@ -18,7 +18,7 @@
 
 //#include "widget.h"
 enum IIRBandWidth_t{Normal , F50kHz , F60kHz , F70kHz};
-enum FIRfilter_t{FastRolloff,SlowRolloff,userDefined};
+enum FIRfilter_t{FastRolloff,SlowRolloff,FastRolloff48k , minphase};
 enum DPLL_BW_t{NO_BW,LOWEST_BW,LOW_BW,MIDLOW_BW,MID_BW,MIDHIGH_BW,HIGH_BW,HIGHEST_BW,AUTO};
 enum polarity_t{InPhase,AntiPhase};
 enum mute_t{unmuted , muted};
@@ -98,13 +98,15 @@ public:
     QCheckBox *DPLL_X128;
     QPushButton *buttonLock;
     void setLock(bool state);
+    void setFIRFilter(enum FIRfilter_t settings);
+    void setDPLL_BW(enum DPLL_BW_t settings);
+    void setDPLL_128X(bool state);
 
 signals:
 
 public slots:
     void slot_sendDACsettings();
-    void slot_FIRchanged(int val);
-    void slot_IIRchanged(int val);
+    void slot_Filterchanged();
     void slot_DPLLchanged(int val);
     void slot_DPPL_x128changed(bool val);
 

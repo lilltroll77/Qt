@@ -125,6 +125,9 @@ void Widget::readDatagram(){
                 dac_tab->channel[ch]->setMute( DAC->channel[ch].mute ,true);
                 dac_tab->channel[ch]->setPolarity( DAC->channel[ch].polarity , true);
             }
+                dac_tab->setDPLL_BW( DAC->DPPL_BW);
+                dac_tab->setDPLL_128X((bool) DAC->DPLL_BWx128);
+                dac_tab->setFIRFilter( DAC->FIRrolloff );
                 main_tab->setMasterVolume(((int)DAC->MasterVolume)/-2 , true);
                 main_tab->setMuteState( DAC->MuteAll , true);
             break;

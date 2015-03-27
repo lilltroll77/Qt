@@ -219,17 +219,19 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     IIRFilter->setToolTip("IIR Bandwith of reconstruction filter in DSD mode");
     IIRFilter->setMaximumWidth(100);
     IIRFilter->setEnabled(false);
-    connect(IIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_IIRchanged(int) ));
+    connect(IIRFilter , SIGNAL(currentIndexChanged) , this , SLOT(slot_Filterchanged()));
 
     FIRlabel = new QLabel;
     FIRlabel->setText("FIR filter for PCM");
     FIRFilter = new QComboBox;
     FIRFilter->addItem("Fast Rolloff",QVariant(0));
     FIRFilter->addItem("Slow Rolloff",QVariant(1));
-    FIRFilter->setToolTip("FIR rolloff of reconstruction filter in PCM mode\nFeature TBD !!!");
+    FIRFilter->addItem("Fast Rolloff 48kHz",QVariant(2));
+    FIRFilter->addItem("Minimium phase",QVariant(3));
+    FIRFilter->setToolTip("FIR rolloff of reconstruction filter in PCM mode");
     FIRFilter->setMaximumWidth(100);
-    FIRFilter->setEnabled(false);
-    connect(FIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_FIRchanged(int) ));
+    //FIRFilter->setEnabled(false);
+    connect(FIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_Filterchanged() ));
 
     layoutReconstruct = new QVBoxLayout;
     layoutReconstruct->addWidget(IIRlabel);
@@ -292,16 +294,26 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     setLayout(topLayout);
 }
 
-void DACTab::slot_FIRchanged(int val){
+void DACTab::slot_Filterchanged(){
+    main_tab->setMode(USER);
     datagram.clear();
     datagram[0]=DAC_RECONSTRUCTION_FILTER;
-    //datagram[1]=(char)
+    datagram[1]=(char) FIRFilter->currentIndex();
+    datagram[2]=(char) IIRFilter->currentIndex();
+    WRITEDATAGRAM;
+
 }
 
-void DACTab::slot_IIRchanged(int val){
-    datagram.clear();
-    datagram[0]=DAC_RECONSTRUCTION_FILTER;
+void DACTab::setFIRFilter(enum FIRfilter_t settings){
+    FIRFilter->setCurrentIndex((int) settings);
+}
 
+void DACTab::setDPLL_BW(enum DPLL_BW_t settings){
+    DPLLbox->setCurrentIndex((int) settings);
+}
+
+void DACTab::setDPLL_128X(bool state){
+    DPLL_X128->setChecked(state);
 }
 
 void DACTab::slot_sendDACsettings(){
@@ -331,6 +343,7 @@ void DACTab::slot_sendDACsettings(){
 
 }
 void DACTab::slot_DPLLchanged(int val){
+    main_tab->setMode(USER);
     datagram.clear();
     datagram[0]=DAC_DPPL;
     datagram[1]=(char) val;
@@ -338,6 +351,7 @@ void DACTab::slot_DPLLchanged(int val){
 }
 
 void DACTab::slot_DPPL_x128changed(bool val){
+    main_tab->setMode(USER);
     datagram.clear();
     datagram[0]=DAC_DPPL_128X;
     datagram[1]=(char) val;
