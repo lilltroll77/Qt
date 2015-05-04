@@ -312,12 +312,16 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
 }
 
 void DACTab::updateStopFreq(){
-    int i = ((int)FIRKnob->Value())-1;
-    FIRKnob->setTitle(QString("fpass=%1Hz\nfstop=%2Hz").arg( (int)round(pass[i] * fs)).arg( (int)round(stop[i] * fs) ));
+    if (FIRFilter->currentIndex() == FastRolloff_var){
+     int i = ((int)FIRKnob->Value())-1;
+     FIRKnob->setTitle(QString("fpass=%1Hz\nfstop=%2Hz").arg( (int)round(pass[i] * fs)).arg( (int)round(stop[i] * fs) ));
+    }else
+     FIRKnob->setTitle(QString("fpass=\nfstop="));
 }
 
 void DACTab::slot_Filterchanged(int type){
     main_tab->setMode(USER);
+    updateStopFreq();
     datagram.clear();
     datagram[0]=DAC_RECONSTRUCTION_FILTER;
     datagram[2]=(char) IIRFilter->currentIndex();
