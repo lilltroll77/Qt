@@ -107,9 +107,10 @@ MainTab::MainTab(QWidget *parent ,  Network *udp_ref) :
 
     input_ComboBox->addItem(tr("AES/EBU"),QVariant(0));
     input_ComboBox->addItem(tr("TOSLINK"),QVariant(1));
+    input_ComboBox->addItem(tr("USB AUDIO"),QVariant(2));
     input_ComboBox->setCurrentIndex(1);
     input_ComboBox->setContentsMargins(5,5,5,5);
-    input_ComboBox->setMaximumWidth(75);
+    input_ComboBox->setMaximumWidth(100);
     //input_selector->addItem(tr("ANALOG"),QVariant(2));
     input_layout->addWidget(input_ComboBox);
     input_layout->addWidget(input_format);
@@ -270,7 +271,8 @@ void MainTab::sendSettings(){
     WRITEDATAGRAM
 }
 
-void MainTab::setLock(bool state , int fs){
+void MainTab::setLock(bool state , int new_fs){
+    fs=new_fs;
     labelFS->setText(QString("fs=%1Hz").arg(fs));
     if(state){
         buttonLock ->setStyleSheet("color: rgb(0, 255, 0)");
@@ -378,6 +380,8 @@ void MainTab::slot_inputselectorChanged(int index){
     datagram[0] = INPUT_SOURCE;
     datagram[1] = (uchar) index;
     WRITEDATAGRAM
+    if(index==2)
+            setFormat(PCM);
 }
 
 void MainTab::sendProgram(){

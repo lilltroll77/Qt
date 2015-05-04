@@ -30,11 +30,11 @@ public:
     explicit MainTab(QWidget *parent = 0 ,  Network *udp_ref =0);
     void setMuteState(bool , bool blocked);
     bool getMuteState();
-
+    int fs;
     void getLock_fs();
     void setMasterVolume(int val, bool blocked);
     int  getMasterVolume();
-    void setLock(bool state, int fs);
+    void setLock(bool state, int new_fs);
     void sendSettings();
     void setProgram(int new_program , bool blocked);
     int  getProgram();

@@ -18,7 +18,7 @@
 
 //#include "widget.h"
 enum IIRBandWidth_t{Normal , F50kHz , F60kHz , F70kHz};
-enum FIRfilter_t{FastRolloff,SlowRolloff,FastRolloff48k , minphase};
+enum FIRfilter_t{FastRolloff_ES9018 , SlowRolloff_ES9018 , Minphase96k , Slow96k , Minphase192k ,Slow192k ,FastRolloff_var};
 enum DPLL_BW_t{NO_BW,LOWEST_BW,LOW_BW,MIDLOW_BW,MID_BW,MIDHIGH_BW,HIGH_BW,HIGHEST_BW,AUTO};
 enum polarity_t{InPhase,AntiPhase};
 enum mute_t{unmuted , muted};
@@ -38,7 +38,7 @@ typedef struct{
       unsigned char MasterVolume;
       enum bool_t MuteAll;
       enum IIRBandWidth_t IIRfilter;
-      enum FIRfilter_t FIRrolloff;
+      int FIRrolloff;
       enum bool_t UseDeemphaseFilter;
       enum DPLL_BW_t DPPL_BW;
       enum bool_t DPLL_BWx128;
@@ -97,18 +97,20 @@ public:
     QLabel *DPLLlabel;
     QCheckBox *DPLL_X128;
     QPushButton *buttonLock;
-    void setLock(bool state);
-    void setFIRFilter(enum FIRfilter_t settings);
+    void setLockAndFs(bool state, int new_fs);
+    void setFIRFilter(int settings);
     void setDPLL_BW(enum DPLL_BW_t settings);
     void setDPLL_128X(bool state);
+    void updateStopFreq();
 
 signals:
 
 public slots:
     void slot_sendDACsettings();
-    void slot_Filterchanged();
+    void slot_Filterchanged(int type);
     void slot_DPLLchanged(int val);
     void slot_DPPL_x128changed(bool val);
+    void slot_FilterFreqChanged(double i);
 
 private:
 QGridLayout *layout;
@@ -120,12 +122,16 @@ QGroupBox *groupBox;
 QGridLayout *topLayout;
 QLabel *IIRlabel;
 QLabel *FIRlabel;
+Knob *FIRKnob;
 QByteArray datagram;
 QUdpSocket  *UDP_Socket;
 QHostAddress *IP_XMOS;
 quint16 *port_XMOS;
 MainTab *main_tab;
 int datagram_count=0;
+int fs=-1;
+const double stop[6]={0.1875   , 0.222222 , 0.291667 , 0.361111 , 0.5 , 0.551};
+const double pass[6]={0.104427 , 0.139236 , 0.208854 , 0.278472 ,  0.417708 , 0.4535 };
 };
 
 #endif // DACTAB_H

@@ -219,26 +219,43 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     IIRFilter->setToolTip("IIR Bandwith of reconstruction filter in DSD mode");
     IIRFilter->setMaximumWidth(100);
     IIRFilter->setEnabled(false);
-    connect(IIRFilter , SIGNAL(currentIndexChanged) , this , SLOT(slot_Filterchanged()));
+    //connect(IIRFilter , SIGNAL(currentIndexChanged) , this , SLOT(slot_Filterchanged()));
 
     FIRlabel = new QLabel;
     FIRlabel->setText("FIR filter for PCM");
     FIRFilter = new QComboBox;
-    FIRFilter->addItem("Fast Rolloff",QVariant(0));
-    FIRFilter->addItem("Slow Rolloff",QVariant(1));
-    FIRFilter->addItem("Fast Rolloff 48kHz",QVariant(2));
-    FIRFilter->addItem("Minimium phase",QVariant(3));
+    FIRFilter->addItem("Fast Rolloff default"    , QVariant(FastRolloff_ES9018));
+    FIRFilter->addItem("Slow Rolloff default"    , QVariant(SlowRolloff_ES9018));
+    FIRFilter->addItem("Minimium phase 96kHz"   , QVariant(Minphase96k));
+    FIRFilter->addItem("Slow Rolloff 96kHz"     , QVariant(Slow96k));
+    FIRFilter->addItem("Minimium phase 192kHz"  , QVariant(Minphase192k));
+    FIRFilter->addItem("Slow Rolloff 192kHz"    , QVariant(Slow192k));
+    FIRFilter->addItem("Variable Fast Rolloff"  , QVariant(6));
+
+
     FIRFilter->setToolTip("FIR rolloff of reconstruction filter in PCM mode");
-    FIRFilter->setMaximumWidth(100);
+    FIRFilter->setMaximumWidth(130);
     //FIRFilter->setEnabled(false);
-    connect(FIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_Filterchanged() ));
+    FIRKnob = new Knob(this);
+    FIRKnob->setRange(1 , 6 , 5);
+    FIRKnob->setSingleStep(1);
+    FIRKnob->setKnobColor("rgb(255, 255, 128)");
+    FIRKnob->setDecimals(0);
+    FIRKnob->setMaximumHeight(130);
+    FIRKnob->setToolTip("Filter index for variable Fast Rolloff filter");
+    FIRKnob->setDisabled(true);
+    updateStopFreq();
+
+    connect(FIRFilter , SIGNAL(currentIndexChanged(int)) , this , SLOT(slot_Filterchanged(int) ));
+    connect(FIRKnob  , SIGNAL(valueChanged(double)) , this , SLOT(slot_FilterFreqChanged(double) ));
 
     layoutReconstruct = new QVBoxLayout;
     layoutReconstruct->addWidget(IIRlabel);
     layoutReconstruct->addWidget(IIRFilter);
     layoutReconstruct->addWidget(FIRlabel);
     layoutReconstruct->addWidget(FIRFilter);
-    groupBoxReconstruct->setFixedHeight(140);
+    layoutReconstruct->addWidget(FIRKnob);
+    groupBoxReconstruct->setFixedHeight(300);
     groupBoxReconstruct->setFixedWidth(150);
     groupBoxReconstruct->setLayout(layoutReconstruct);
 
@@ -294,21 +311,48 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     setLayout(topLayout);
 }
 
-void DACTab::slot_Filterchanged(){
+void DACTab::updateStopFreq(){
+    int i = ((int)FIRKnob->Value())-1;
+    FIRKnob->setTitle(QString("fpass=%1Hz\nfstop=%2Hz").arg( (int)round(pass[i] * fs)).arg( (int)round(stop[i] * fs) ));
+}
+
+void DACTab::slot_Filterchanged(int type){
     main_tab->setMode(USER);
     datagram.clear();
     datagram[0]=DAC_RECONSTRUCTION_FILTER;
-    datagram[1]=(char) FIRFilter->currentIndex();
     datagram[2]=(char) IIRFilter->currentIndex();
+    if(type == FastRolloff_var){
+         FIRKnob->setDisabled(false);
+         datagram[1]=(char) (FastRolloff_var + FIRKnob->Value());
+         updateStopFreq();
+    }else{
+         FIRKnob->setDisabled(true);
+         datagram[1]=(char) type;
+         }
     WRITEDATAGRAM;
 
 }
 
-void DACTab::setFIRFilter(enum FIRfilter_t settings){
-    FIRFilter->setCurrentIndex((int) settings);
+void DACTab::slot_FilterFreqChanged(double i){
+    updateStopFreq();
+    datagram.clear();
+    datagram[0]=DAC_RECONSTRUCTION_FILTER;
+    datagram[1]=(char) (FastRolloff_var + char(i));
+    datagram[2]=(char) IIRFilter->currentIndex();
+    WRITEDATAGRAM;
+    datagram.clear();
+}
+
+void DACTab::setFIRFilter(int settings){
+    if(settings >=FastRolloff_var){
+        FIRFilter -> setCurrentIndex(FastRolloff_var);
+        FIRKnob -> setValue(settings - FastRolloff_var +1);
+    }else
+        FIRFilter->setCurrentIndex(settings);
 }
 
 void DACTab::setDPLL_BW(enum DPLL_BW_t settings){
+    //QDebug(settings);
     DPLLbox->setCurrentIndex((int) settings);
 }
 
@@ -327,6 +371,8 @@ void DACTab::slot_sendDACsettings(){
         DAC->channel[ch].MasterTrim=-1;
         }
     DAC->FIRrolloff = (FIRfilter_t)FIRFilter->currentIndex();
+    if(DAC->FIRrolloff==6)
+        DAC->FIRrolloff = 6 + (int)FIRKnob->Value();
     DAC->IIRfilter = (IIRBandWidth_t) IIRFilter->currentIndex();
     DAC->DPPL_BW = (DPLL_BW_t) DPLLbox->currentIndex();
     DAC->DPLL_BWx128 = (bool_t) DPLL_X128->isChecked();
@@ -358,10 +404,12 @@ void DACTab::slot_DPPL_x128changed(bool val){
     WRITEDATAGRAM
 }
 
-void DACTab::setLock(bool state){
+void DACTab::setLockAndFs(bool state, int new_fs){
+    fs = new_fs;
     if(state){
         buttonLock ->setStyleSheet("color: rgb(0, 255, 0)");
         buttonLock ->setText(tr("LOCKED"));
+        updateStopFreq();
 
     }else{
         buttonLock ->setStyleSheet("color: rgb(255, 0, 0)");
