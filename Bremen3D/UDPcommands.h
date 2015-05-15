@@ -55,7 +55,8 @@ enum UDPcommands{
     GET_DACLOCK_FS,
     SPDIF_CHANGED,
     DAC_DPPL,
-    DAC_DPPL_128X
+    DAC_DPPL_128X,
+    DITHER,
 };
 
 

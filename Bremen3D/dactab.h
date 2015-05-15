@@ -42,6 +42,7 @@ typedef struct{
       enum bool_t UseDeemphaseFilter;
       enum DPLL_BW_t DPPL_BW;
       enum bool_t DPLL_BWx128;
+      unsigned char DitherdB;
 }DAC_settings_t;
 
 class DACGain: public QWidget
@@ -101,6 +102,7 @@ public:
     void setFIRFilter(int settings);
     void setDPLL_BW(enum DPLL_BW_t settings);
     void setDPLL_128X(bool state);
+    void setDither(unsigned char dB);
     void updateStopFreq();
 
 signals:
@@ -111,18 +113,22 @@ public slots:
     void slot_DPLLchanged(int val);
     void slot_DPPL_x128changed(bool val);
     void slot_FilterFreqChanged(double i);
+    void slot_DitherChanged(double val);
 
 private:
 QGridLayout *layout;
 QVBoxLayout *layoutReconstruct;
+QVBoxLayout *layoutDither;
 QVBoxLayout *layoutDPLL;
 QGroupBox *groupBoxReconstruct;
 QGroupBox *groupBoxDPLL;
 QGroupBox *groupBox;
+QGroupBox *groupDither;
 QGridLayout *topLayout;
 QLabel *IIRlabel;
 QLabel *FIRlabel;
 Knob *FIRKnob;
+Knob *DitherKnob;
 QByteArray datagram;
 QUdpSocket  *UDP_Socket;
 QHostAddress *IP_XMOS;

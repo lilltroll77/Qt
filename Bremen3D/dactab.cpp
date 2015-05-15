@@ -203,7 +203,7 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBox->setTitle("Individual DAC channel settings");
     groupBox->setFixedHeight(250);
     groupBox->setFixedWidth(800);
-    topLayout->addWidget(groupBox,1,0,1,4);
+    topLayout->addWidget(groupBox,2,0,1,4);
     groupBoxReconstruct = new QGroupBox;
     groupBoxReconstruct->setTitle(tr("Reconstruction filter"));
     groupBoxReconstruct->setToolTip(tr("The settings of the reconstruction filter of the DAC\nFeature TBD!!"));
@@ -306,9 +306,40 @@ DACTab::DACTab(QWidget *parent ,  Network *udp) :
     groupBoxDPLL->setLayout(layoutDPLL);
 
 
-    topLayout->addWidget(groupBoxReconstruct,0,0,1,1);
+    topLayout->addWidget(groupBoxReconstruct,0,0,2,1);
     topLayout->addWidget(groupBoxDPLL ,0,1,1,1);
+
+    groupDither = new QGroupBox(this);
+    groupDither->setMaximumHeight(160);
+    layoutDither = new QVBoxLayout;
+    groupDither->setTitle(tr("Dither"));
+    DitherKnob = new Knob(this);
+    DitherKnob->setRange( -150 , -50 , 101);
+    DitherKnob->setValue(-150);
+    DitherKnob->setDecimals(0);
+    DitherKnob->setKnobColor("rgb(255, 188, 225)");
+    DitherKnob->setSingleStep(1);
+    DitherKnob->setTitle("Dither [dBFS]");
+    DitherKnob->setToolTip("Dither in dB relative Full Scale");
+    layoutDither->addWidget(DitherKnob);
+    groupDither->setLayout(layoutDither);
+    topLayout->addWidget(groupDither ,1,1,1,1);
+    connect(DitherKnob , SIGNAL(valueChanged(double)) , this , SLOT(slot_DitherChanged(double)));
+
     setLayout(topLayout);
+}
+
+void DACTab::setDither(unsigned char dB){
+    DitherKnob->blockSignals(true);
+    DitherKnob->setValue(double(-dB));
+    DitherKnob->blockSignals(false);
+}
+
+void DACTab::slot_DitherChanged(double val){
+    datagram.clear();
+    datagram[0]=DITHER;
+    datagram[1]=(char) (-val);
+    WRITEDATAGRAM;
 }
 
 void DACTab::updateStopFreq(){
@@ -380,6 +411,7 @@ void DACTab::slot_sendDACsettings(){
     DAC->IIRfilter = (IIRBandWidth_t) IIRFilter->currentIndex();
     DAC->DPPL_BW = (DPLL_BW_t) DPLLbox->currentIndex();
     DAC->DPLL_BWx128 = (bool_t) DPLL_X128->isChecked();
+    DAC->DitherdB = (unsigned char) (-DitherKnob->Value());
    //main_tab = parent()->findChild("MainTab");
     DAC->MasterVolume = (unsigned char) -2*(main_tab->getMasterVolume()); //½dB attenuation steps
     if(main_tab->getMuteState())

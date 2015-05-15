@@ -264,25 +264,25 @@ void MainWindow::waitForPING(){
 
 
 void MainWindow::syncFromHost(){
-    int mode=central_widget->main_tab->getMode();
-    if(mode==PRESET){
-        central_widget->main_tab->sendProgram();
-        central_widget->main_tab->getLock_fs();
-    }else{
-    bool mute = central_widget->main_tab->getMuteState();
     central_widget->main_tab->slot_sendMute(true);
     delay(250);
-    for(int ch=0 ; ch<8 ; ch++){
-        central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
-       delay(10);
-    }
+    bool mute = central_widget->main_tab->getMuteState();
+    central_widget->mixer_tab->sendMixerSettings();
+    central_widget->main_tab->sendSettings();
     central_widget->eq_tab->slot_sendPreGain();
     central_widget->dac_tab->slot_sendDACsettings();
-    central_widget->mixer_tab->sendMixerSettings();
-    central_widget->main_tab->slot_sendMute(mute);
-    central_widget->main_tab->sendSettings();
-    central_widget->main_tab->getLock_fs();
+
+    int mode=central_widget->main_tab->getMode();
+    if(mode==PRESET)
+        central_widget->main_tab->sendProgram();
+    else{
+        for(int ch=0 ; ch<8 ; ch++){
+            central_widget->eq_tab->channel[ch]->slot_sendEQChannelSettings();
+        delay(10);
+        }
     }
+    central_widget->main_tab->slot_sendMute(mute);
+    central_widget->main_tab->getLock_fs();
 }
 
 void MainWindow::slot_syncFromHost(bool button){
