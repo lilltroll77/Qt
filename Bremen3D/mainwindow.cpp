@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ethernetport_Local = LOCAL_PORT;
 
     msgBoxAbout = new QMessageBox;
-    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2015").arg(VERSION).arg(COMPILEDATE) );
+    msgBoxAbout->setText(QString("XMOS-GUI ver: %1\nCompiled %2\n\Written in C++\nBy Mikael Bohman 2013-2016").arg(VERSION).arg(COMPILEDATE) );
     msgBoxAbout->setFixedWidth(640);
     msgBoxAbout->setFixedHeight(480);
     msgBoxAbout->setWindowTitle(tr("About"));

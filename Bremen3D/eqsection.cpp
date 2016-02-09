@@ -58,8 +58,10 @@ EQSection::EQSection(QWidget *parent, QCustomPlot *new_plot , Network *udp , Kno
       filterType->addItem(tr("1:st order HP"),QVariant(HP1));
       filterType->addItem(tr("2:nd order HP"),QVariant(HP2));
 
-      filterType->addItem(tr("Low Shelf"),QVariant(LowShelf));
-      filterType->addItem(tr("High Shelf"),QVariant(HighShelf));
+      filterType->addItem(tr("Low Shelf (1:st)"),QVariant(LowShelf1));
+      filterType->addItem(tr("Low Shelf (2:nd)"),QVariant(LowShelf2));
+      filterType->addItem(tr("High Shelf (1:st)"),QVariant(HighShelf1));
+      filterType->addItem(tr("High Shelf (2:nd)"),QVariant(HighShelf2));
       filterType->addItem(tr("Peaking EQ"),QVariant(PeakingEQ));
       filterType->addItem(tr("Notch"),QVariant(Notch));
       filterType->addItem(tr("AllPass"),QVariant(AllPass));

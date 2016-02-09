@@ -4,7 +4,7 @@
 #include <QVector>
 #include <complex>
 #include "defines.h"
-enum filterType_t{LP1, LP2 , HP1 , HP2 , LowShelf , HighShelf , PeakingEQ , Notch , AllPass , BandPass , Mute};
+enum filterType_t{LP1, LP2 , HP1 , HP2 , LowShelf1 , LowShelf2 , HighShelf1, HighShelf2 , PeakingEQ , Notch , AllPass , BandPass , Mute};
 
 //Must match XMOS code
 

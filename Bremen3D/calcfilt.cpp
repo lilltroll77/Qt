@@ -71,6 +71,7 @@ double a0 ,a1 ,a2 ,b0,b1,b2;
     double A = pow(10,EQ.Gain/40);
     double sqA = pow(10,EQ.Gain/20);
     double p; //prewarp factor
+    double w;
     switch(EQ.type){
     case LP1:
             p = tan(0.5*w0);
@@ -148,7 +149,16 @@ double a0 ,a1 ,a2 ,b0,b1,b2;
             a1 =  -2*cos(w0);
             a2 =   1 - alpha/A;
             break;
-      case LowShelf:
+      case LowShelf1:
+            w = 2 * M_PI * EQ.Fc;
+            b0 = 2*fs + w*sqA;
+            b1 = w*sqA - 2*fs;
+            b2 = 0;
+            a0 = 2*fs + w;
+            a1 = w - 2*fs;
+            a2 = 0;
+            break;
+      case LowShelf2:
             b0 =    A*( (A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha );
             b1 =  2*A*( (A-1) - (A+1)*cos(w0)                   );
             b2 =    A*( (A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha );
@@ -156,7 +166,16 @@ double a0 ,a1 ,a2 ,b0,b1,b2;
             a1 =   -2*( (A-1) + (A+1)*cos(w0)                   );
             a2 =        (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha;
             break;
-      case HighShelf:
+      case HighShelf1:
+            w = 2 * M_PI * EQ.Fc;
+            b0 = w - 2*sqA*fs;
+            b1 = 2*sqA*fs +w;
+            b2 = 0;
+            a0 = 2*fs + w;
+            a1 = w - 2*fs;
+            a2 = 0;
+            break;
+      case HighShelf2:
             b0 =    A*( (A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha );
             b1 = -2*A*( (A-1) + (A+1)*cos(w0)                   );
             b2 =    A*( (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha );
